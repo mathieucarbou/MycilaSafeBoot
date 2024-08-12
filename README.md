@@ -7,6 +7,13 @@ MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 
 It allows to have only one application partition to use the maximum available flash size.
 
+- [Overview](#overview)
+- [How it works](#how-it-works)
+- [How to build the SafeBoot firmware image](#how-to-build-the-safeboot-firmware-image)
+- [SafeBoot Example](#safeboot-example)
+- [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
+- [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
+
 ## Overview
 
 Usually, a normal partition table when supporting OTA updates on a 4MB ESP32 looks like this:
@@ -117,7 +124,7 @@ The app loads, shows a button to restart in SafeBoot mode.
 After clicking on it, the ESP will reboot into SafeBoot mode.
 From there, you can access ElegantOTA to flash a new firmware, even from another application.
 
-## How to integrate the SafeBoot in your project ?
+## How to integrate the SafeBoot in your project
 
 In the PIO file, some settings are added to specify the partition table and the SafeBoot location and the script to generate the factory image.
 
@@ -136,7 +143,7 @@ custom_safeboot_dir = ../../tools/SafeBoot
 
 You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases) the list of available SafeBoot images, with the Python script to add to your build.
 
-## How to reboot in SafeBoot mode from the app ?
+## How to reboot in SafeBoot mode from the app
 
 You can use [MycilaSystem](https://github.com/mathieucarbou/MycilaSystem):
 
