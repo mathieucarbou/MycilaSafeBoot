@@ -1,8 +1,7 @@
 # MycilaSafeBoot
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Continuous Integration](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/ci.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/ci.yml)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/mathieucarbou/library/MycilaSafeBoot.svg)](https://registry.platformio.org/libraries/mathieucarbou/MycilaSafeBoot)
+[![Continuous Integration](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml)
 
 MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 

@@ -1,8 +1,7 @@
 # MycilaSafeBoot
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Continuous Integration](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/ci.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/ci.yml)
-[![PlatformIO Registry](https://badges.registry.platformio.org/packages/mathieucarbou/library/MycilaSafeBoot.svg)](https://registry.platformio.org/libraries/mathieucarbou/MycilaSafeBoot)
+[![Continuous Integration](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml)
 
 MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 
@@ -124,6 +123,12 @@ In the PIO file, some settings are added to specify the partition table and the 
 extra_scripts = post:factory.py
 board_build.partitions = partitions-4MB-safeboot.csv
 custom_safeboot_dir = ../../tools/SafeBoot
+```
+
+It is also possible to use a URL to point to a remote safeboot image:
+
+```ini
+custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
 ```
 
 ## How to reboot in SafeBoot mode from the app ?

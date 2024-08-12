@@ -17,7 +17,7 @@ concurrency:
 
 jobs:
   build:
-    name: Build
+    name: Build safeboot-${{ matrix.board }}.bin
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -63,6 +63,7 @@ jobs:
           pip install --upgrade platformio
           SAFEBOOT_BOARD=${{ matrix.board }} pio run -e safeboot
           mv .pio/build/safeboot/safeboot.bin ./safeboot-${{ matrix.board }}.bin
+          pio run -d test
 
       - name: Upload
         uses: actions/upload-artifact@v4
@@ -103,6 +104,7 @@ jobs:
           title: Pre-release Builds
           files: |
             artifacts/*.bin
+            tools/factory.py
 
       - name: Changelog
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -123,5 +125,6 @@ jobs:
           draft: false
           files: |
             artifacts/*.bin
+            tools/factory.py
         env:
           GITHUB_TOKEN: ${{ secrets.ACCESS_TOKEN }}

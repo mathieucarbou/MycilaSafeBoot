@@ -6,6 +6,7 @@ Import("env", "projenv")
 
 import sys
 import os
+import urllib.request
 from os.path import join, getsize
 
 sys.path.append(join(env.PioPlatform().get_package_dir("tool-esptoolpy")))
@@ -28,6 +29,7 @@ def generateFactooryImage(source, target, env):
 
     safeboot_offset = 0x10000
     safeboot_image = ""
+
     safeboot_project = env.GetProjectOption("custom_safeboot_dir", "")
     if safeboot_project != "":
         print(
@@ -40,6 +42,14 @@ def generateFactooryImage(source, target, env):
             "SAFEBOOT_BOARD=%s pio run -d %s" % (env.get("BOARD"), safeboot_project)
         )
         safeboot_image = join(safeboot_project, ".pio/build/safeboot/safeboot.bin")
+        if not os.path.isfile(safeboot_image):
+            raise Exception("SafeBoot image not found: %s" % safeboot_image)
+        
+    safeboot_url = env.GetProjectOption("custom_safeboot_url", "")
+    if safeboot_url != "":
+        print("Downloading SafeBoot image from %s" % safeboot_url)
+        safeboot_image = env.subst("$BUILD_DIR/safeboot.bin")
+        urllib.request.urlretrieve(safeboot_url, safeboot_image)
         if not os.path.isfile(safeboot_image):
             raise Exception("SafeBoot image not found: %s" % safeboot_image)
 
