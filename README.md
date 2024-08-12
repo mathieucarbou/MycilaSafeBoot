@@ -21,7 +21,7 @@ spiffs,   data, spiffs,  0x3F0000, 0x10000,
 ```
 
 Because of the need to have 2 partitions with the same size, the firmware is then limited to only 2MB in this case when the ESP has 4MB flash.
-2MB is left unused (OT will switch to the updated partition after the firmware is updated through OTA).
+2MB is left unused (the OTA process will switch to the updated partition once completed).
 
 **A SafeBoot partition is a small bootable recovery partition allowing you to use ElegantOTA to flash the firmware.**
 Consequently, the firmware can take all the remaining space on the flash.
@@ -89,16 +89,18 @@ Go inside `examples/App` and execute:
 You should see at the end of the build something like:
 
 ```
+Generating factory image for serial flashing
+Downloading SafeBoot image from https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
     Offset | File
  -   0x1000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/bootloader.bin
  -   0x8000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/partitions.bin
  -   0xe000 | /Users/mat/.platformio/packages/framework-arduinoespressif32@src-17df1753722b7b9e1913598420d4e038/tools/partitions/boot_app0.bin
- -  0x10000 | ../../.pio/build/safeboot/safeboot.bin
+ -  0x10000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/safeboot.bin
  -  0xb0000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/firmware.bin
 
 [...]
 
-Wrote 0x143b20 bytes to file /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/firmware.factory.bin, ready to flash to offset 0x0
+Wrote 0x1451a0 bytes to file /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/firmware.factory.bin, ready to flash to offset 0x0
 Factory image generated: /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/firmware.factory.bin
 ```
 
@@ -122,19 +124,40 @@ In the PIO file, some settings are added to specify the partition table and the 
 ```ini
 extra_scripts = post:factory.py
 board_build.partitions = partitions-4MB-safeboot.csv
-custom_safeboot_dir = ../../tools/SafeBoot
-```
-
-It is also possible to use a URL to point to a remote safeboot image:
-
-```ini
 custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
 ```
 
+It is also possible to point to a folder if you download the SafeBoot project locally:
+
+```ini
+custom_safeboot_dir = ../../tools/SafeBoot
+```
+
+You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases) the list of available SafeBoot images, with the Python script to add to your build.
+
 ## How to reboot in SafeBoot mode from the app ?
+
+You can use [MycilaSystem](https://github.com/mathieucarbou/MycilaSystem):
 
 ```cpp
 #include <MycilaSystem.h>
 
 Mycila::System.restartFactory("safeboot");
+```
+
+or this custom code:
+
+```cpp
+#include <esp_ota_ops.h>
+#include <esp_partition.h>
+
+const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_FACTORY, partitionName);
+if (partition) {
+  esp_ota_set_boot_partition(partition);
+  esp_restart();
+  return true;
+} else {
+  ESP_LOGE("SafeBoot", "SafeBoot partition not found");
+  return false;
+}
 ```
