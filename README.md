@@ -124,6 +124,7 @@ In the PIO file, some settings are added to specify the partition table and the 
 ```ini
 extra_scripts = post:factory.py
 board_build.partitions = partitions-4MB-safeboot.csv
+board_build.app_partition_name = app
 custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
 ```
 
