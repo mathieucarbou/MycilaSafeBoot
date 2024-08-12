@@ -30,6 +30,7 @@ jobs:
             "esp32-s2-saola-1",
             "esp32-c3-devkitc-02",
             "esp32-c6-devkitc-1",
+            "esp32-poe"
           ]
     steps:
       - name: Checkout
