@@ -136,7 +136,7 @@ def generateFactooryImage(source, target, env):
 
     esptool.main(cmd)
 
-    status("Factory image generated! You can flash it with:> \nesptool.py write_flash 0x0 %s" % factory_image)
+    status("Factory image generated! You can flash it with:\n> esptool.py write_flash 0x0 %s" % factory_image)
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", generateFactooryImage)
