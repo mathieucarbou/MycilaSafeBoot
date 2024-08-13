@@ -7,6 +7,8 @@ MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 
 It allows to have only one application partition to use the maximum available flash size.
 
+The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.github.io/docs/Safeboot/).
+
 - [Overview](#overview)
 - [How it works](#how-it-works)
 - [How to build the SafeBoot firmware image](#how-to-build-the-safeboot-firmware-image)
