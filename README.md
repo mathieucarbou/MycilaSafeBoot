@@ -16,6 +16,9 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
 
+[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
+[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
+
 ## Overview
 
 Usually, a normal partition table when supporting OTA updates on a 4MB ESP32 looks like this:
@@ -66,8 +69,15 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 ## How it works
 
 1. When a user wants to update the app firmware, we have to tell the app to reboot in recovery mode.
+
 2. Once booted in recovery mode, an Access Point is created with the SSID `SafeBoot`.
-3. Connect to it, and upload the firmware as usual.
+
+[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
+
+3. Connect to it, and upload the firmware as usual through ElegantOTA
+
+[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
+
 4. ElegantOTA will then flash the firmware to the `app` partition and reboot in it.
 
 ## How to build the SafeBoot firmware image
