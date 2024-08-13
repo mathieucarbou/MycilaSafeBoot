@@ -14,9 +14,24 @@ import esptool
 
 # print(env.Dump())
 
+quiet = False
+
+
+def status(msg):
+    """Print status message to stderr"""
+    if not quiet:
+        critical(msg)
+
+
+def critical(msg):
+    """Print critical message to stderr"""
+    sys.stderr.write("factory.py: ")
+    sys.stderr.write(msg)
+    sys.stderr.write("\n")
+
 
 def generateFactooryImage(source, target, env):
-    print("Generating factory image for serial flashing")
+    status("Generating factory image for serial flashing")
 
     app_offset = 0xB0000
     app_image = env.subst("$BUILD_DIR/${PROGNAME}.bin")
@@ -31,7 +46,7 @@ def generateFactooryImage(source, target, env):
 
     safeboot_project = env.GetProjectOption("custom_safeboot_dir", "")
     if safeboot_project != "":
-        print(
+        status(
             "Building SafeBoot image for board %s from %s"
             % (env.get("BOARD"), safeboot_project)
         )
@@ -48,7 +63,7 @@ def generateFactooryImage(source, target, env):
     if safeboot_url != "":
         safeboot_image = env.subst("$BUILD_DIR/safeboot.bin")
         if not os.path.isfile(safeboot_image):
-            print(
+            status(
                 "Downloading SafeBoot image from %s to %s"
                 % (safeboot_url, safeboot_image)
             )
@@ -59,7 +74,7 @@ def generateFactooryImage(source, target, env):
                 file.write(response.content)
 
     if fs_offset != 0:
-        print("Building File System image")
+        status("Building File System image")
         env.Execute("pio run -t buildfs -e %s" % env["PIOENV"])
 
     factory_image = env.subst("$BUILD_DIR/${PROGNAME}.factory.bin")
@@ -100,28 +115,28 @@ def generateFactooryImage(source, target, env):
     if fw_size > max_size:
         raise Exception("Firmware binary too large: %d > %d" % (fw_size, max_size))
 
-    print("    Offset | File")
+    status("    Offset | File")
     for section in sections:
         sect_adr, sect_file = section.split(" ", 1)
-        print(f" -   {sect_adr} | {sect_file}")
+        status(f" -   {sect_adr} | {sect_file}")
         cmd += [sect_adr, sect_file]
 
     if safeboot_image != "" and os.path.isfile(safeboot_image):
-        print(f" -  {hex(safeboot_offset)} | {safeboot_image}")
+        status(f" -  {hex(safeboot_offset)} | {safeboot_image}")
         cmd += [hex(safeboot_offset), safeboot_image]
 
-    print(f" -  {hex(app_offset)} | {app_image}")
+    status(f" -  {hex(app_offset)} | {app_image}")
     cmd += [hex(app_offset), app_image]
 
     if fs_image != 0 and os.path.isfile(fs_image):
-        print(f" - {hex(fs_offset)} | {fs_image}")
+        status(f" - {hex(fs_offset)} | {fs_image}")
         cmd += [hex(fs_offset), fs_image]
 
-    print("Using esptool.py arguments: %s" % " ".join(cmd))
+    status("Using esptool.py arguments: %s" % " ".join(cmd))
 
     esptool.main(cmd)
 
-    print("Factory image generated: %s" % factory_image)
+    status("Factory image generated: %s" % factory_image)
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", generateFactooryImage)

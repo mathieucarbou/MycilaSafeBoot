@@ -4,6 +4,22 @@
 #
 Import("env")
 import os
+import sys
+
+quiet = False
+
+
+def status(msg):
+    """Print status message to stderr"""
+    if not quiet:
+        critical(msg)
+
+
+def critical(msg):
+    """Print critical message to stderr"""
+    sys.stderr.write("safeboot.py: ")
+    sys.stderr.write(msg)
+    sys.stderr.write("\n")
 
 
 def safeboot(source, target, env):
@@ -14,13 +30,14 @@ def safeboot(source, target, env):
     fw_size = os.path.getsize(env.subst("$BUILD_DIR/${PROGNAME}.bin"))
     if fw_size > max_size:
         raise Exception("firmware binary too large: %d > %d" % (fw_size, max_size))
-    
-    print("Firmware size valid: %d <= %d" % (fw_size, max_size))
+
+    status("Firmware size valid: %d <= %d" % (fw_size, max_size))
 
     os.rename(
         env.subst("$BUILD_DIR/${PROGNAME}.bin"), env.subst("$BUILD_DIR/safeboot.bin")
     )
 
-    print("SafeBoot firmware created: %s" % env.subst("$BUILD_DIR/safeboot.bin"))
+    status("SafeBoot firmware created: %s" % env.subst("$BUILD_DIR/safeboot.bin"))
+
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", safeboot)
