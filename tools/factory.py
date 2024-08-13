@@ -2,18 +2,17 @@
 #
 # Copyright (C) 2023-2024 Mathieu Carbou
 #
-Import("env", "projenv")
+Import("env")
 
 import sys
 import os
-import urllib.request
+import requests
 from os.path import join, getsize
 
 sys.path.append(join(env.PioPlatform().get_package_dir("tool-esptoolpy")))
 import esptool
 
 # print(env.Dump())
-# print(projenv.Dump())
 
 
 def generateFactooryImage(source, target, env):
@@ -44,14 +43,20 @@ def generateFactooryImage(source, target, env):
         safeboot_image = join(safeboot_project, ".pio/build/safeboot/safeboot.bin")
         if not os.path.isfile(safeboot_image):
             raise Exception("SafeBoot image not found: %s" % safeboot_image)
-        
+
     safeboot_url = env.GetProjectOption("custom_safeboot_url", "")
     if safeboot_url != "":
-        print("Downloading SafeBoot image from %s" % safeboot_url)
         safeboot_image = env.subst("$BUILD_DIR/safeboot.bin")
-        urllib.request.urlretrieve(safeboot_url, safeboot_image)
         if not os.path.isfile(safeboot_image):
-            raise Exception("SafeBoot image not found: %s" % safeboot_image)
+            print(
+                "Downloading SafeBoot image from %s to %s"
+                % (safeboot_url, safeboot_image)
+            )
+            response = requests.get(safeboot_url)
+            if response.status_code != 200:
+                raise Exception("Download error: %d" % response.status_code)
+            with open(safeboot_image, "wb") as file:
+                file.write(response.content)
 
     if fs_offset != 0:
         print("Building File System image")
