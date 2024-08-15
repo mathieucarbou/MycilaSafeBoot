@@ -35,7 +35,7 @@ spiffs,   data, spiffs,  0x3F0000, 0x10000,
 Because of the need to have 2 partitions with the same size, the firmware is then limited to only 2MB in this case when the ESP has 4MB flash.
 2MB is left unused (the OTA process will switch to the updated partition once completed).
 
-**A SafeBoot partition is a small bootable recovery partition allowing you to use ElegantOTA to flash the firmware.**
+**A SafeBoot partition is a small bootable recovery partition allowing you to use [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) to flash the firmware.**
 Consequently, the firmware can take all the remaining space on the flash.
 
 **The SafeBoot partition is 655360 bytes only.**
@@ -74,11 +74,11 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 
 [![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
 
-3. Connect to it, and upload the firmware as usual through ElegantOTA
+3. Connect to it, and upload the firmware as usual through [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)
 
 [![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
-4. ElegantOTA will then flash the firmware to the `app` partition and reboot in it.
+4. [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) will then flash the firmware to the `app` partition and reboot in it.
 
 ## How to build the SafeBoot firmware image
 
@@ -134,7 +134,7 @@ esptool.py write_flash 0x0 .pio/build/esp32dev/firmware.factory.bin
 Restart the ESP.
 The app loads, shows a button to restart in SafeBoot mode.
 After clicking on it, the ESP will reboot into SafeBoot mode.
-From there, you can access ElegantOTA to flash a new firmware, even from another application.
+From there, you can access [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) to flash a new firmware, even from another application.
 
 ## How to integrate the SafeBoot in your project
 
