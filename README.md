@@ -15,6 +15,7 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [SafeBoot Example](#safeboot-example)
 - [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
+- [License](#license)
 
 [![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
 [![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
@@ -181,3 +182,20 @@ if (partition) {
   return false;
 }
 ```
+
+## License
+
+This project is GPL because the SafeBoot code depends on ElegantOTA, which is GPL.
+But as a final project, you do not depend on the source code.
+To use SafeBoot, your project depends on:
+
+1. The python script `factory,py` which is MIT
+2. The generated binary firmware image, either downloaded from the release section or built from the SafeBoot project.
+
+This GPL-ed binary output can be used without modification in the final factory  firmware.
+The SafeBoot image is just added to the factory firmware image, so the GPL constrains do not apply.
+
+Refs:
+
+- https://www.gnu.org/licenses/gpl-faq.html#WhatCaseIsOutputGPL
+- https://www.gnu.org/licenses/gpl-faq.html#Prelinking
