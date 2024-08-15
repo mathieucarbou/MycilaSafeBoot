@@ -2,6 +2,7 @@
 
 [![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
 [![Continuous Integration](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml)
+[![Download](https://img.shields.io/badge/Download-safeboot-green.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/releases)
 
 MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 
