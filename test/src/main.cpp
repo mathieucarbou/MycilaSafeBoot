@@ -28,7 +28,7 @@ void setup() {
 
   webServer.on("/safeboot", HTTP_POST, [](AsyncWebServerRequest* request) {
     request->send(200, "text/plain", "Restarting in SafeBoot mode... Look for an Access Point named: SafeBoot-" + getEspID());
-    Mycila::System.restartFactory("safeboot");
+    Mycila::System::restartFactory("safeboot");
   });
 
   webServer.begin();

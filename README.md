@@ -164,7 +164,7 @@ You can use [MycilaSystem](https://github.com/mathieucarbou/MycilaSystem):
 ```cpp
 #include <MycilaSystem.h>
 
-Mycila::System.restartFactory("safeboot");
+Mycila::System::restartFactory("safeboot");
 ```
 
 or this custom code:
