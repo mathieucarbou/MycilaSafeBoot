@@ -20,6 +20,7 @@ jobs:
     name: Build safeboot-${{ matrix.board }}.bin
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         board:
           [
@@ -58,8 +59,10 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
           SAFEBOOT_BOARD=${{ matrix.board }} pio run -e safeboot
-          mv .pio/build/safeboot/safeboot.bin ./safeboot-${{ matrix.board }}.bin
-          pio run -d test
+          cp .pio/build/safeboot/safeboot.bin ./safeboot-${{ matrix.board }}.bin
+      
+      - name: Test
+        run: SAFEBOOT_BOARD=${{ matrix.board }} pio run -d test -e ci
 
       - name: Upload
         uses: actions/upload-artifact@v4
