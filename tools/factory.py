@@ -53,9 +53,9 @@ def generateFactooryImage(source, target, env):
         if not os.path.isdir(safeboot_project):
             raise Exception("SafeBoot project not found: %s" % safeboot_project)
         env.Execute(
-            "SAFEBOOT_BOARD=%s pio run -d %s" % (env.get("BOARD"), safeboot_project)
+            "SAFEBOOT_BOARD=%s pio run -e safeboot -d %s" % (env.get("BOARD"), safeboot_project)
         )
-        safeboot_image = join(safeboot_project, ".pio/build/safeboot/safeboot.bin")
+        safeboot_image = join(safeboot_project, ".pio/build/safeboot/firmware.bin")
         if not os.path.isfile(safeboot_image):
             raise Exception("SafeBoot image not found: %s" % safeboot_image)
 
@@ -115,7 +115,7 @@ def generateFactooryImage(source, target, env):
     if fw_size > max_size:
         raise Exception("Firmware binary too large: %d > %d" % (fw_size, max_size))
 
-    status("    Offset | File")
+    status("     Offset | File")
     for section in sections:
         sect_adr, sect_file = section.split(" ", 1)
         status(f" -   {sect_adr} | {sect_file}")

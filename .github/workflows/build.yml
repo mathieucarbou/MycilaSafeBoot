@@ -59,7 +59,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
           SAFEBOOT_BOARD=${{ matrix.board }} pio run -e safeboot
-          cp .pio/build/safeboot/safeboot.bin ./safeboot-${{ matrix.board }}.bin
+          cp .pio/build/safeboot/firmware.bin ./safeboot-${{ matrix.board }}.bin
       
       - name: Test
         run: SAFEBOOT_BOARD=${{ matrix.board }} pio run -d test -e ci

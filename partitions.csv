@@ -1,4 +1,4 @@
-# Name,   Type, SubType,  Offset,   Size,    Flags
-nvs,      data, nvs,      0x9000,   0x5000,
-otadata,  data, ota,      0xE000,   0x2000,
-safeboot, app,  ota_0,    0x10000,  0xA0000,
+# Name   ,Type ,SubType  ,Offset ,Size  ,Flags
+nvs      ,data ,nvs      ,36K    ,20K   ,
+otadata  ,data ,ota      ,56K    ,8K    ,
+safeboot ,app  ,ota_0    ,64K    ,640K  ,

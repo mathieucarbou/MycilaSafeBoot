@@ -33,11 +33,7 @@ def safeboot(source, target, env):
 
     status("Firmware size valid: %d <= %d" % (fw_size, max_size))
 
-    os.rename(
-        env.subst("$BUILD_DIR/${PROGNAME}.bin"), env.subst("$BUILD_DIR/safeboot.bin")
-    )
-
-    status("SafeBoot firmware created: %s" % env.subst("$BUILD_DIR/safeboot.bin"))
+    status("SafeBoot firmware created: %s" % env.subst("$BUILD_DIR/${PROGNAME}.bin"))
 
 
 env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", safeboot)
