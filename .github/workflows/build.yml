@@ -32,7 +32,8 @@ jobs:
             "esp32-c3-devkitc-02",
             "esp32-c6-devkitc-1",
             # "esp32-h2-devkitm-1", # no WiFi
-            "esp32-poe"
+            "esp32-poe",
+            "esp32-solo1"
           ]
     steps:
       - name: Checkout
