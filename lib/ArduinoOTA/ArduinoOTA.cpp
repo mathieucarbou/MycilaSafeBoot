@@ -10,6 +10,7 @@
 #define LWIP_OPEN_SRC
 #endif
 #include "ArduinoOTA.h"
+// #include "ESPmDNS.h"
 #include "MD5Builder.h"
 #include "NetworkClient.h"
 #include "Update.h"
@@ -18,7 +19,7 @@
 // #define OTA_DEBUG Serial
 
 ArduinoOTAClass::ArduinoOTAClass()
-    : _port(0), _initialized(false), _rebootOnSuccess(true), _state(OTA_IDLE), _size(0), _cmd(0), _ota_port(0), _ota_timeout(1000),
+    : _port(0), _initialized(false), _rebootOnSuccess(true), _mdnsEnabled(true), _state(OTA_IDLE), _size(0), _cmd(0), _ota_port(0), _ota_timeout(1000),
       _start_callback(NULL), _end_callback(NULL), _error_callback(NULL), _progress_callback(NULL) {}
 
 ArduinoOTAClass::~ArduinoOTAClass() {
@@ -100,6 +101,11 @@ ArduinoOTAClass& ArduinoOTAClass::setRebootOnSuccess(bool reboot) {
   return *this;
 }
 
+ArduinoOTAClass& ArduinoOTAClass::setMdnsEnabled(bool enabled) {
+  _mdnsEnabled = enabled;
+  return *this;
+}
+
 void ArduinoOTAClass::begin() {
   if (_initialized) {
     log_w("already initialized");
@@ -122,6 +128,10 @@ void ArduinoOTAClass::begin() {
     sprintf(tmp, "esp32-%02x%02x%02x%02x%02x%02x", mac[0], mac[1], mac[2], mac[3], mac[4], mac[5]);
     _hostname = tmp;
   }
+  // if (_mdnsEnabled) {
+  // MDNS.begin(_hostname.c_str());
+  // MDNS.enableArduino(_port, (_password.length() > 0));
+  // }
   _initialized = true;
   _state = OTA_IDLE;
   log_i("OTA server at: %s.local:%u", _hostname.c_str(), _port);
@@ -356,6 +366,9 @@ void ArduinoOTAClass::_runUpdate() {
 void ArduinoOTAClass::end() {
   _initialized = false;
   _udp_ota.stop();
+  // if (_mdnsEnabled) {
+  //   MDNS.end();
+  // }
   _state = OTA_IDLE;
   log_i("OTA server stopped.");
 }
@@ -371,7 +384,7 @@ void ArduinoOTAClass::handle() {
   if (_udp_ota.parsePacket()) {
     _onRx();
   }
-  _udp_ota.flush(); // always flush, even zero length packets must be flushed.
+  _udp_ota.clear(); // always clear, even zero length packets must be cleared.
 }
 
 int ArduinoOTAClass::getCommand() {

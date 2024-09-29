@@ -58,6 +58,9 @@ class ArduinoOTAClass {
     // Sets if the device should be rebooted after successful update. Default true
     ArduinoOTAClass& setRebootOnSuccess(bool reboot);
 
+    // Sets if the device should advertise itself to Arduino IDE. Default true
+    ArduinoOTAClass& setMdnsEnabled(bool enabled);
+
     // This callback will be called when OTA connection has begun
     ArduinoOTAClass& onStart(THandlerFunction fn);
 
@@ -93,6 +96,7 @@ class ArduinoOTAClass {
     NetworkUDP _udp_ota;
     bool _initialized;
     bool _rebootOnSuccess;
+    bool _mdnsEnabled;
     ota_state_t _state;
     int _size;
     int _cmd;
