@@ -24,8 +24,8 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
 - [License](#license)
 
-[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
-[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
+[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
+[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
 ## Overview
 
@@ -80,11 +80,11 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 
 2. Once booted in recovery mode, an Access Point is created with the SSID `SafeBoot`.
 
-[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
+[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
 
 3. Connect to it, and upload the firmware as usual through [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)
 
-[![](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://oss.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
+[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
 4. [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) will then flash the firmware to the `app` partition and reboot in it.
 
