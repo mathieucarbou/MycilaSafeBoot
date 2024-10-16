@@ -33,7 +33,7 @@ def critical(msg):
 def generateFactooryImage(source, target, env):
     status("Generating factory image for serial flashing")
 
-    app_offset = 0xB0000
+    app_offset = 0x10000
     app_image = env.subst("$BUILD_DIR/${PROGNAME}.bin")
 
     # Set fs_offset = 0 to disable LittleFS image generation
@@ -122,6 +122,7 @@ def generateFactooryImage(source, target, env):
         cmd += [sect_adr, sect_file]
 
     if safeboot_image != "" and os.path.isfile(safeboot_image):
+        app_offset = 0xB0000
         status(f" -  {hex(safeboot_offset)} | {safeboot_image}")
         cmd += [hex(safeboot_offset), safeboot_image]
 
