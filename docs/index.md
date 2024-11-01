@@ -56,7 +56,7 @@ nvs,      data, nvs,      0x9000,   0x5000,
 otadata,  data, ota,      0xE000,   0x2000,
 safeboot, app,  factory,  0x10000,  0xA0000,
 app,      app,  ota_0,    0xB0000,  0x330000,
-fs,       data, spiffs,   0x3E0000, 0x10000,
+spiffs,   data, spiffs,   0x3E0000, 0x10000,
 coredump, data, coredump, 0x3F0000, 0x10000,
 ```
 
@@ -68,7 +68,7 @@ nvs,      data, nvs,      0x9000,   0x5000,
 otadata,  data, ota,      0xE000,   0x2000,
 safeboot, app,  factory,  0x10000,  0xA0000,
 app,      app,  ota_0,    0xB0000,  0x730000,
-fs,       data, spiffs,   0x7E0000, 0x10000,
+spiffs    data, spiffs,   0x7E0000, 0x10000,
 coredump, data, coredump, 0x7F0000, 0x10000,
 ```
 
