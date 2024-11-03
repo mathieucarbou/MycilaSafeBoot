@@ -40,6 +40,17 @@ app1,     app,  ota_1,   0x200000, 0x1F0000,
 spiffs,   data, spiffs,  0x3F0000, 0x10000,
 ```
 
+which can also be written as:
+
+```
+# Name   ,Type ,SubType  ,Offset ,Size  ,Flags
+nvs      ,data ,nvs      ,36K    ,20K   ,
+otadata  ,data ,ota      ,56K    ,8K    ,
+app0     ,app  ,ota_0    ,64K    ,1984K ,
+app1     ,app  ,ota_1    ,2048K  ,1984K ,
+spiffs   ,data ,spiffs   ,4032K  ,64K   ,
+```
+
 Because of the need to have 2 partitions with the same size, the firmware is then limited to only 2MB in this case when the ESP has 4MB flash.
 2MB is left unused (the OTA process will switch to the updated partition once completed).
 
@@ -48,7 +59,7 @@ Consequently, the firmware can take all the remaining space on the flash.
 
 **The SafeBoot partition is 655360 bytes only.**
 
-Example for 4MB partition with a SafeBoot partition and an application size of 3MB:
+**Example for 4MB partition** with a SafeBoot partition and an application size of 3MB:
 
 ```
 # Name,   Type, SubType,  Offset,   Size,    Flags
@@ -60,7 +71,19 @@ spiffs,   data, spiffs,   0x3E0000, 0x10000,
 coredump, data, coredump, 0x3F0000, 0x10000,
 ```
 
-Example for 8Mb partition with a SafeBoot partition and an application size of 7MB:
+which can also be written as:
+
+```
+# Name   ,Type ,SubType  ,Offset ,Size  ,Flags
+nvs      ,data ,nvs      ,36K    ,20K   ,
+otadata  ,data ,ota      ,56K    ,8K    ,
+safeboot ,app  ,factory  ,64K    ,640K  ,
+app      ,app  ,ota_0    ,704K   ,3264K ,
+spiffs   ,data ,spiffs   ,3968K  ,64K   ,
+coredump ,data ,coredump ,4032K  ,64K   ,
+```
+
+**Example for 8Mb partition** with a SafeBoot partition and an application size of 7MB:
 
 ```
 # Name,   Type, SubType,  Offset,   Size,    Flags
@@ -70,6 +93,18 @@ safeboot, app,  factory,  0x10000,  0xA0000,
 app,      app,  ota_0,    0xB0000,  0x730000,
 spiffs    data, spiffs,   0x7E0000, 0x10000,
 coredump, data, coredump, 0x7F0000, 0x10000,
+```
+
+which can also be written as:
+
+```
+# Name   ,Type ,SubType  ,Offset ,Size  ,Flags
+nvs      ,data ,nvs      ,36K    ,20K   ,
+otadata  ,data ,ota      ,56K    ,8K    ,
+safeboot ,app  ,factory  ,64K    ,640K  ,
+app      ,app  ,ota_0    ,704K   ,7312K ,
+spiffs   ,data ,spiffs   ,8128K  ,64K   ,
+coredump ,data ,coredump ,8192K  ,64K   ,
 ```
 
 The SafeBoot partition is also automatically booted wen the firmware is missing.
@@ -199,7 +234,7 @@ To use SafeBoot, your project depends on:
 1. The python script `factory,py` which is MIT
 2. The generated binary firmware image, either downloaded from the release section or built from the SafeBoot project.
 
-This GPL-ed binary output can be used without modification in the final factory  firmware.
+This GPL-ed binary output can be used without modification in the final factory firmware.
 The SafeBoot image is just added to the factory firmware image, so the GPL constrains do not apply.
 
 Refs:
