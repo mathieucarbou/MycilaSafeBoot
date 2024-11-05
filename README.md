@@ -18,9 +18,9 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 
 - [Overview](#overview)
 - [How it works](#how-it-works)
+- [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
 - [How to build the SafeBoot firmware image](#how-to-build-the-safeboot-firmware-image)
 - [SafeBoot Example](#safeboot-example)
-- [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
 - [License](#license)
 
@@ -117,11 +117,32 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 
 [![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
 
-3. Connect to it, and upload the firmware as usual through [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA)
+3. Connect to the Access Point.
+
+4. Now, you can flash the new firmware, either with [ArduinoOTA](https://docs.platformio.org/en/latest/platforms/espressif32.html#over-the-air-ota-update) or with [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) by going to `http://192.168.4.1`
+
+5. After the flash is successful, the ESP will reboot in the new firmware.
 
 [![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
-4. [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) will then flash the firmware to the `app` partition and reboot in it.
+## How to integrate the SafeBoot in your project
+
+In the PIO file, some settings are added to specify the partition table and the SafeBoot location and the script to generate the factory image.
+
+```ini
+extra_scripts = post:factory.py
+board_build.partitions = partitions-4MB-safeboot.csv
+board_build.app_partition_name = app
+custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
+```
+
+It is also possible to point to a folder if you download the SafeBoot project locally:
+
+```ini
+custom_safeboot_dir = ../../tools/SafeBoot
+```
+
+You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases) the list of available SafeBoot images, with the Python script to add to your build.
 
 ## How to build the SafeBoot firmware image
 
@@ -178,25 +199,6 @@ Restart the ESP.
 The app loads, shows a button to restart in SafeBoot mode.
 After clicking on it, the ESP will reboot into SafeBoot mode.
 From there, you can access [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) to flash a new firmware, even from another application.
-
-## How to integrate the SafeBoot in your project
-
-In the PIO file, some settings are added to specify the partition table and the SafeBoot location and the script to generate the factory image.
-
-```ini
-extra_scripts = post:factory.py
-board_build.partitions = partitions-4MB-safeboot.csv
-board_build.app_partition_name = app
-custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/latest/safeboot-esp32dev.bin
-```
-
-It is also possible to point to a folder if you download the SafeBoot project locally:
-
-```ini
-custom_safeboot_dir = ../../tools/SafeBoot
-```
-
-You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases) the list of available SafeBoot images, with the Python script to add to your build.
 
 ## How to reboot in SafeBoot mode from the app
 
