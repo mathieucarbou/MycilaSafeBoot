@@ -123,16 +123,11 @@ jobs:
         with:
           path: artifacts/
 
-      - name: Move
-        run: |
-          ls -R artifacts
-          find artifacts -name '*.bin' -exec mv {} artifacts/ \;
-    
       - name: Test
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
-          SAFEBOOT_IMAGE=artifacts/safeboot-${{ matrix.board }}.bin BOARD=${{ matrix.board }} pio run -d test -e ci
+          SAFEBOOT_IMAGE=artifacts/${{ matrix.board }}/safeboot-${{ matrix.board }}.bin BOARD=${{ matrix.board }} pio run -d test -e ci
     
   release:
     name: Release
