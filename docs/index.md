@@ -142,6 +142,12 @@ It is also possible to point to a folder if you download the SafeBoot project lo
 custom_safeboot_dir = ../../tools/SafeBoot
 ```
 
+It is also possible to point to a pre-downloaded safeoot image:
+
+```ini
+custom_safeboot_file = safeboot.bin
+```
+
 You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases) the list of available SafeBoot images, with the Python script to add to your build.
 
 ## How to build the SafeBoot firmware image
