@@ -7,7 +7,8 @@
 #include <ElegantOTA.h>
 #include <WiFi.h>
 
-#include <ESPAsyncWebServer.h>
+// #include <ESPAsyncWebServer.h>
+#include <WebServer.h>
 
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
@@ -24,7 +25,8 @@ String getEspID() {
   return espId;
 }
 
-AsyncWebServer webServer(80);
+// AsyncWebServer webServer(80);
+WebServer webServer(80);
 String hostname = "SafeBoot-";
 
 void setup() {
@@ -46,10 +48,21 @@ void setup() {
   ElegantOTA.begin(&webServer);
 
   // Start web server
-  webServer.rewrite("/", "/update");
-  webServer.onNotFound([](AsyncWebServerRequest* request) {
-    request->redirect("/");
+
+  // webServer.rewrite("/", "/update");
+  // webServer.onNotFound([](AsyncWebServerRequest* request) {
+  //   request->redirect("/");
+  // });
+
+  webServer.on("/", HTTP_GET, []() {
+    webServer.sendHeader("Location", "/update");
+    webServer.send(302, "text/plain", "");
   });
+  webServer.onNotFound([]() {
+    webServer.sendHeader("Location", "/update");
+    webServer.send(302, "text/plain", "");
+  });
+
   webServer.begin();
 
   // Start OTA
@@ -59,6 +72,7 @@ void setup() {
 }
 
 void loop() {
+  webServer.handleClient();
   ElegantOTA.loop();
   ArduinoOTA.handle();
 }
