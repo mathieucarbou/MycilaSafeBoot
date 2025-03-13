@@ -1,4 +1,4 @@
-// SPDX-License-Identifier:
+// SPDX-License-Identifier: MIT
 /*
  * Copyright (C) 2023-2025 Mathieu Carbou
  */
