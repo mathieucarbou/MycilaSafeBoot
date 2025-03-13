@@ -1,10 +1,10 @@
-// SPDX-License-Identifier: GPL-3.0-or-later
+// SPDX-License-Identifier:
 /*
- * Copyright (C) 2023-2024 Mathieu Carbou
+ * Copyright (C) 2023-2025 Mathieu Carbou
  */
 
 #include <ArduinoOTA.h>
-#include <ElegantOTA.h>
+#include <HTTPUpdateServer.h>
 #include <WiFi.h>
 
 // #include <ESPAsyncWebServer.h>
@@ -27,6 +27,8 @@ String getEspID() {
 
 // AsyncWebServer webServer(80);
 WebServer webServer(80);
+HTTPUpdateServer httpUpdater;
+
 String hostname = "SafeBoot-";
 
 void setup() {
@@ -44,22 +46,10 @@ void setup() {
   WiFi.softAP(hostname);
 
   // Start ElegantOTA
-  ElegantOTA.setAutoReboot(true);
-  ElegantOTA.begin(&webServer);
+  httpUpdater.setup(&webServer, "/");
 
-  // Start web server
-
-  // webServer.rewrite("/", "/update");
-  // webServer.onNotFound([](AsyncWebServerRequest* request) {
-  //   request->redirect("/");
-  // });
-
-  webServer.on("/", HTTP_GET, []() {
-    webServer.sendHeader("Location", "/update");
-    webServer.send(302, "text/plain", "");
-  });
   webServer.onNotFound([]() {
-    webServer.sendHeader("Location", "/update");
+    webServer.sendHeader("Location", "/");
     webServer.send(302, "text/plain", "");
   });
 
@@ -73,6 +63,5 @@ void setup() {
 
 void loop() {
   webServer.handleClient();
-  ElegantOTA.loop();
   ArduinoOTA.handle();
 }

@@ -3,7 +3,7 @@
 [![Latest Release](https://img.shields.io/github/release/mathieucarbou/MycilaSafeBoot.svg)](https://GitHub.com/mathieucarbou/MycilaSafeBoot/releases/)
 [![Download](https://img.shields.io/badge/Download-safeboot-green.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/releases)
 
-[![GPLv3 license](https://img.shields.io/badge/License-GPLv3-blue.svg)](https://www.gnu.org/licenses/gpl-3.0.txt)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Contributor Covenant](https://img.shields.io/badge/Contributor%20Covenant-2.1-4baaaa.svg)](code_of_conduct.md)
 
 [![Build](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml)
@@ -25,7 +25,6 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [License](#license)
 
 [![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
-[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
 ## Overview
 
@@ -54,7 +53,7 @@ spiffs   ,data ,spiffs   ,4032K  ,64K   ,
 Because of the need to have 2 partitions with the same size, the firmware is then limited to only 2MB in this case when the ESP has 4MB flash.
 2MB is left unused (the OTA process will switch to the updated partition once completed).
 
-**A SafeBoot partition is a small bootable recovery partition allowing you to use [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) to flash the firmware.**
+**A SafeBoot partition is a small bootable recovery partition allowing you to flash the firmware.**
 Consequently, the firmware can take all the remaining space on the flash.
 
 **The SafeBoot partition is 655360 bytes only.**
@@ -119,11 +118,9 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 
 3. Connect to the Access Point.
 
-4. Now, you can flash the new firmware, either with [ArduinoOTA](https://docs.platformio.org/en/latest/platforms/espressif32.html#over-the-air-ota-update) or with [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) by going to `http://192.168.4.1`
+4. Now, you can flash the new firmware, either with `ArduinoOTA` or from the web page by going to `http://192.168.4.1`
 
 5. After the flash is successful, the ESP will reboot in the new firmware.
-
-[![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ota.jpeg)
 
 ## How to integrate the SafeBoot in your project
 
@@ -204,7 +201,7 @@ esptool.py write_flash 0x0 .pio/build/esp32dev/firmware.factory.bin
 Restart the ESP.
 The app loads, shows a button to restart in SafeBoot mode.
 After clicking on it, the ESP will reboot into SafeBoot mode.
-From there, you can access [ElegantOTA](https://github.com/ayushsharma82/ElegantOTA) to flash a new firmware, even from another application.
+From there, you can access the web page to flash a new firmware, even from another application.
 
 ## How to reboot in SafeBoot mode from the app
 
@@ -232,20 +229,3 @@ if (partition) {
   return false;
 }
 ```
-
-## License
-
-This project is GPL because the SafeBoot code depends on ElegantOTA, which is GPL.
-But as a final project, you do not depend on the source code.
-To use SafeBoot, your project depends on:
-
-1. The python script `factory,py` which is MIT
-2. The generated binary firmware image, either downloaded from the release section or built from the SafeBoot project.
-
-This GPL-ed binary output can be used without modification in the final factory firmware.
-The SafeBoot image is just added to the factory firmware image, so the GPL constrains do not apply.
-
-Refs:
-
-- https://www.gnu.org/licenses/gpl-faq.html#WhatCaseIsOutputGPL
-- https://www.gnu.org/licenses/gpl-faq.html#Prelinking
