@@ -5,7 +5,9 @@
 
 #include <ArduinoOTA.h>
 #include <HTTPUpdateServer.h>
+#include <HardwareSerial.h>
 #include <MycilaESPConnect.h>
+#include <MycilaLogger.h>
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
   #include <ESPmDNS.h>
@@ -16,7 +18,8 @@
 
 #define TAG "SafeBoot"
 
-// AsyncWebServer webServer(80);
+Mycila::Logger logger;
+
 static WebServer webServer(80);
 static HTTPUpdateServer httpUpdater;
 static Mycila::ESPConnect espConnect;
@@ -34,14 +37,33 @@ static String getChipIDStr() {
 }
 
 void setup() {
+  Serial.begin(115200);
+#if ARDUINO_USB_CDC_ON_BOOT
+  Serial.setTxTimeoutMs(0);
+  delay(100);
+#else
+  while (!Serial)
+    yield();
+#endif
+
+  logger.forwardTo(&Serial);
+  logger.setLevel(ARDUHAL_LOG_LEVEL_DEBUG);
+
   // Init hostname
   hostname = "SafeBoot-" + getChipIDStr();
+  logger.info(TAG, "Hostname: %s", hostname.c_str());
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
   if (partition) {
     esp_ota_set_boot_partition(partition);
   }
+  // setup routes
+  httpUpdater.setup(&webServer, "/");
+  webServer.onNotFound([]() {
+    webServer.sendHeader("Location", "/");
+    webServer.send(302, "text/plain", "");
+  });
 
   // load ESPConnect configuration
   espConnect.loadConfiguration(espConnectConfig);
@@ -63,8 +85,7 @@ void setup() {
 
   espConnect.listen([](Mycila::ESPConnect::State previous, Mycila::ESPConnect::State state) {
     if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
-      Serial.println("Connected to network");
-    } else if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
+      logger.warn(TAG, "Connect timeout! Starting AP mode instead...");
       // if ETH DHCP times out, we start AP mode
       espConnectConfig.apMode = true;
       espConnect.setConfig(espConnectConfig);
@@ -74,15 +95,11 @@ void setup() {
   // connect...
   espConnect.begin(hostname.c_str(), hostname.c_str(), "", espConnectConfig);
 
-  // setup routes
-  httpUpdater.setup(&webServer, "/");
-
-  webServer.onNotFound([]() {
-    webServer.sendHeader("Location", "/");
-    webServer.send(302, "text/plain", "");
-  });
+  logger.info(TAG, "Connected to network!");
+  logger.info(TAG, "IP Address: %s", espConnect.getIPAddress().toString().c_str());
 
   // starte http
+  logger.info(TAG, "Starting HTTP server...");
   webServer.begin();
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
@@ -92,10 +109,13 @@ void setup() {
 #endif
 
   // Start OTA
+  logger.info(TAG, "Starting OTA server...");
   ArduinoOTA.setHostname(hostname.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
+
+  logger.info(TAG, "Done!");
 }
 
 void loop() {

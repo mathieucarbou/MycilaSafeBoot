@@ -13,13 +13,21 @@ static const char serverIndex[] PROGMEM =
      </head>
      <body>
      <form method='POST' action='' enctype='multipart/form-data'>
-         Firmware:<br>
+         <label for='firmware'><strong>Firmware:</strong></label>
+         <br>
          <input type='file' accept='.bin,.bin.gz' name='firmware'>
-         <input type='submit' value='Update Firmware'>
+         <br>
+         <input type='submit' value='Update Firmware' onclick="this.disabled=true; this.value = 'Updating...'; this.form.submit();">
+     </form>
+     <br>
+     <form method='POST' action='cancel' enctype='multipart/form-data'>
+        <input type='hidden' name='cancel' value='true'>
+         <input type='submit' value='Cancel and Reboot'>
      </form>
      </body>
      </html>)";
-static const char successResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"15;URL=/\">Update Success! Rebooting...";
+static const char successResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Update Success! Rebooting...";
+static const char cancelResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Rebooting...";
 
 class HTTPUpdateServer {
   public:
@@ -30,14 +38,26 @@ class HTTPUpdateServer {
     void setup(WebServer* server, const String& path) {
       _server = server;
 
+      // handler for cancel
+      _server->on(
+        path == "/" ? "/cancel" : (path + "/cancel"),
+        HTTP_POST,
+        [&]() {
+          _server->send(200, "text/html", cancelResponse);
+          _server->client().stop();
+          delay(500);
+          ESP.restart();
+        },
+        [&]() {});
+
       // handler for the /update form page
-      _server->on(path.c_str(), HTTP_GET, [&]() {
-        _server->send_P(200, PSTR("text/html"), serverIndex);
+      _server->on(path, HTTP_GET, [&]() {
+        _server->send(200, "text/html", serverIndex);
       });
 
       // handler for the /update form POST (once file upload finishes)
       _server->on(
-        path.c_str(),
+        path,
         HTTP_POST,
         [&]() {
           if (Update.hasError()) {
