@@ -97,6 +97,10 @@ void setup() {
 
   logger.info(TAG, "Connected to network!");
   logger.info(TAG, "IP Address: %s", espConnect.getIPAddress().toString().c_str());
+  logger.info(TAG, "Hostname: %s", espConnect.getHostname().c_str());
+  if (espConnect.getWiFiSSID().length()) {
+    logger.info(TAG, "WiFi SSID: %s", espConnect.getWiFiSSID().c_str());
+  }
 
   // starte http
   logger.info(TAG, "Starting HTTP server...");
