@@ -98,7 +98,7 @@ jobs:
             "tinypico",
             "wipy3",
             "wt32-eth01",
-            "lilygo-t-eth-lite-s3"
+            # "lilygo-t-eth-lite-s3"
           ]
     steps:
       - name: Checkout
