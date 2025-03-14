@@ -122,6 +122,8 @@ The SafeBoot partition is also automatically booted wen the firmware is missing.
 
 5. After the flash is successful, the ESP will reboot in the new firmware.
 
+SafeBoot partition also supports [MycilaESPConnect](https://github.com/mathieucarbou/MycilaESPConnect), which means if your application saves some network settings (WiFi SSID, Ethernet or WiFi static IP, etc), they will be reused.
+
 ## How to integrate the SafeBoot in your project
 
 In the PIO file, some settings are added to specify the partition table and the SafeBoot location and the script to generate the factory image.
@@ -152,7 +154,13 @@ You can find in the [Project Releases](https://github.com/mathieucarbou/MycilaSa
 Go inside `tools/SafeBoot` and run:
 
 ```bash
-> SAFEBOOT_BOARD=esp32dev pio run -e safeboot
+> pio run -e esp32dev
+```
+
+If your board does not exist, you can specify it like this:
+
+```bash
+> SAFEBOOT_BOARD=my-board pio run -e safeboot
 ```
 
 `SAFEBOOT_BOARD` is the environment variable to specify the board to build the SafeBoot firmware for.
@@ -210,6 +218,7 @@ You can use [MycilaSystem](https://github.com/mathieucarbou/MycilaSystem):
 ```cpp
 #include <MycilaSystem.h>
 
+espConnect.saveConfiguration(); // if you want to save ESPConnect settings for network
 Mycila::System::restartFactory("safeboot");
 ```
 

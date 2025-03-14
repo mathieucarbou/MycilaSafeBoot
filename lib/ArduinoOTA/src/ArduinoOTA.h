@@ -12,10 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-/*
- * Code copied from Arduino ESP32 core library at https://github.com/espressif/arduino-esp32/tree/master/libraries/ArduinoOTA
- * Code updates to remove mDNS
- */
 #ifndef __ARDUINO_OTA_H
 #define __ARDUINO_OTA_H
 

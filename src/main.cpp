@@ -5,17 +5,25 @@
 
 #include <ArduinoOTA.h>
 #include <HTTPUpdateServer.h>
-#include <WiFi.h>
+#include <MycilaESPConnect.h>
 
-// #include <ESPAsyncWebServer.h>
-#include <WebServer.h>
+#ifndef MYCILA_SAFEBOOT_NO_MDNS
+  #include <ESPmDNS.h>
+#endif
 
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
 
 #define TAG "SafeBoot"
 
-String getEspID() {
+// AsyncWebServer webServer(80);
+static WebServer webServer(80);
+static HTTPUpdateServer httpUpdater;
+static Mycila::ESPConnect espConnect;
+static Mycila::ESPConnect::Config espConnectConfig;
+static String hostname;
+
+static String getChipIDStr() {
   uint32_t chipId = 0;
   for (int i = 0; i < 17; i += 8) {
     chipId |= ((ESP.getEfuseMac() >> (40 - i)) & 0xff) << i;
@@ -25,15 +33,9 @@ String getEspID() {
   return espId;
 }
 
-// AsyncWebServer webServer(80);
-WebServer webServer(80);
-HTTPUpdateServer httpUpdater;
-
-String hostname = "SafeBoot-";
-
 void setup() {
   // Init hostname
-  hostname += getEspID();
+  hostname = "SafeBoot-" + getChipIDStr();
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
@@ -41,11 +43,38 @@ void setup() {
     esp_ota_set_boot_partition(partition);
   }
 
-  // Start AP
-  WiFi.mode(WIFI_AP);
-  WiFi.softAP(hostname);
+  // load ESPConnect configuration
+  espConnect.loadConfiguration(espConnectConfig);
+  espConnect.setBlocking(true);
+  espConnect.setAutoRestart(false);
 
-  // Start ElegantOTA
+  // If the passed config is to be in AP mode, or has a SSID that's fine.
+  // If the passed config is empty, we need to check if the board supports ETH.
+  // - For boards relying only on Wifi, if a SSID is not set and AP is not set (config empty), then we need to go to AP mode.
+  // - For boards supporting Ethernet, we do not know if an Ethernet cable is plugged, so we cannot directly start AP mode, because the config might be no AP mode and no SSID.
+  //   So we will start, wait for connect timeout (20 seconds), to get DHCP address from ETH, and if failed, we start in AP mode
+  if (!espConnectConfig.apMode && !espConnectConfig.wifiSSID.length()) {
+#ifdef ESPCONNECT_ETH_SUPPORT
+    espConnect.setCaptivePortalTimeout(20);
+#else
+    espConnectConfig.apMode = true;
+#endif
+  }
+
+  espConnect.listen([](Mycila::ESPConnect::State previous, Mycila::ESPConnect::State state) {
+    if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
+      Serial.println("Connected to network");
+    } else if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
+      // if ETH DHCP times out, we start AP mode
+      espConnectConfig.apMode = true;
+      espConnect.setConfig(espConnectConfig);
+    }
+  });
+
+  // connect...
+  espConnect.begin(hostname.c_str(), hostname.c_str(), "", espConnectConfig);
+
+  // setup routes
   httpUpdater.setup(&webServer, "/");
 
   webServer.onNotFound([]() {
@@ -53,11 +82,19 @@ void setup() {
     webServer.send(302, "text/plain", "");
   });
 
+  // starte http
   webServer.begin();
+
+#ifndef MYCILA_SAFEBOOT_NO_MDNS
+  // Start mDNS
+  MDNS.begin(hostname.c_str());
+  MDNS.addService("http", "tcp", 80);
+#endif
 
   // Start OTA
   ArduinoOTA.setHostname(hostname.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
+  ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
 }
 
