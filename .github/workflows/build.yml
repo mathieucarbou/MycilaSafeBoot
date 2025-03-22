@@ -38,7 +38,8 @@ jobs:
             "tinypico",
             "wipy3",
             "wt32-eth01",
-            "lilygo-t-eth-lite-s3"
+            "lilygo-t-eth-lite-s3",
+            "wemos_d1_uno32"
           ]
     steps:
       - name: Checkout
@@ -98,7 +99,8 @@ jobs:
             "tinypico",
             "wipy3",
             "wt32-eth01",
-            # "lilygo-t-eth-lite-s3"
+            # "lilygo-t-eth-lite-s3",
+            # "wemos_d1_uno32"
           ]
     steps:
       - name: Checkout
