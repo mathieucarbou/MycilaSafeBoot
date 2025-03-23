@@ -3,3 +3,5 @@
 /.pio
 /.vscode
 /logs
+
+/sdkconfig.defaults

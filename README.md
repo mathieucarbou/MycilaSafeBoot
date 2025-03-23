@@ -22,7 +22,7 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [How to build the SafeBoot firmware image](#how-to-build-the-safeboot-firmware-image)
 - [SafeBoot Example](#safeboot-example)
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
-- [License](#license)
+- [Configuration options to manage build size](#configuration-options-to-manage-build-size)
 
 [![](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)](https://mathieu.carbou.me/MycilaSafeBoot/safeboot-ssid.jpeg)
 
@@ -106,7 +106,7 @@ spiffs   ,data ,spiffs   ,8128K  ,64K   ,
 coredump ,data ,coredump ,8192K  ,64K   ,
 ```
 
-The SafeBoot partition is also automatically booted wen the firmware is missing.
+The SafeBoot partition is also automatically booted when the firmware is missing.
 
 ## How it works
 
@@ -238,3 +238,42 @@ if (partition) {
   return false;
 }
 ```
+
+## Configuration options to manage build size
+
+Squezing everything into the SafeBoot partition (655360 bytes only) is a tight fit especially on ethernet enabled boards.
+
+Disabling the logging capabilites saves about 12 kbytes in the final build. Just comment out `MYCILA_LOGGER_SUPPORT` in `platformio.ini`.
+
+```ini
+; -D MYCILA_LOGGER_SUPPORT
+```
+
+Disabling mDNS saves about 24 kbytes. Enable both [...]\_NO_DNS options in `platformio.ini` to reduce the build size:
+
+```ini
+-D ESPCONNECT_NO_MDNS
+-D MYCILA_SAFEBOOT_NO_MDNS
+```
+
+### Options matrix
+
+| Board                | mDNS: on, logger: on | mDNS: on, logger: off | mDNS: off, logger: off |
+| -------------------- | -------------------- | --------------------- | ---------------------- |
+| denky_d4             | FAILED               | OK                    | OK                     |
+| esp32-c3-devkitc-02  | OK                   | OK                    | OK                     |
+| esp32-c6-devkitc-1   | FAILED               | FAILED                | OK                     |
+| esp32-gateway        | FAILED               | OK                    | OK                     |
+| esp32-poe            | FAILED               | FAILED                | OK                     |
+| esp32-poe-iso        | FAILED               | FAILED                | OK                     |
+| esp32-s2-saola-1     | OK                   | OK                    | OK                     |
+| esp32-s3-devkitc-1   | OK                   | OK                    | OK                     |
+| esp32-solo1          | OK                   | OK                    | OK                     |
+| esp32dev             | OK                   | OK                    | OK                     |
+| esp32s3box           | OK                   | OK                    | OK                     |
+| lilygo-t-eth-lite-s3 | OK                   | OK                    | OK                     |
+| lolin_s2_mini        | OK                   | OK                    | OK                     |
+| tinypico             | FAILED               | OK                    | OK                     |
+| wemos_d1_uno32       | OK                   | OK                    | OK                     |
+| wipy3                | FAILED               | OK                    | OK                     |
+| wt32-eth01           | FAILED               | FAILED                | OK                     |
