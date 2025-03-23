@@ -35,11 +35,12 @@ jobs:
             "esp32-solo1",
             "esp32dev",
             "esp32s3box",
+            "lilygo-t-eth-lite-s3",
+            "lolin_s2_mini",
             "tinypico",
+            "wemos_d1_uno32",
             "wipy3",
             "wt32-eth01",
-            "lilygo-t-eth-lite-s3",
-            "wemos_d1_uno32"
           ]
     steps:
       - name: Checkout
@@ -96,11 +97,11 @@ jobs:
             "esp32-solo1",
             "esp32dev",
             "esp32s3box",
+            "lolin_s2_mini",
             "tinypico",
+            "wemos_d1_uno32",
             "wipy3",
             "wt32-eth01",
-            # "lilygo-t-eth-lite-s3",
-            # "wemos_d1_uno32"
           ]
     steps:
       - name: Checkout
