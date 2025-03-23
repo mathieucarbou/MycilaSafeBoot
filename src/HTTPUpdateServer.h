@@ -4,7 +4,7 @@
 #include <Update.h>
 #include <WebServer.h>
 
-static const char serverIndex[] PROGMEM =
+static String serverIndex =
   R"(<!DOCTYPE html>
      <html lang='en'>
      <head>
@@ -12,6 +12,7 @@ static const char serverIndex[] PROGMEM =
          <meta name='viewport' content='width=device-width,initial-scale=1'/>
      </head>
      <body>
+     <h1>SafeBoot ${V}</h1>
      <form method='POST' action='' enctype='multipart/form-data'>
          <label for='firmware'><strong>Firmware:</strong></label>
          <br>
@@ -26,11 +27,15 @@ static const char serverIndex[] PROGMEM =
      </form>
      </body>
      </html>)";
-static const char successResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Update Success! Rebooting...";
-static const char cancelResponse[] PROGMEM = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Rebooting...";
+static const char* successResponse = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Update Success! Rebooting...";
+static const char* cancelResponse = "<META http-equiv=\"refresh\" content=\"10;URL=/\">Rebooting...";
 
 class HTTPUpdateServer {
   public:
+    static void setVersion(const char* version) {
+      serverIndex.replace("${V}", version);
+    }
+
     void setup(WebServer* server) {
       setup(server, "/update");
     }
