@@ -4,6 +4,8 @@
 #include <Update.h>
 #include <WebServer.h>
 
+extern const char* __COMPILED_APP_VERSION__;
+
 static String serverIndex =
   R"(<!DOCTYPE html>
      <html lang='en'>
@@ -13,7 +15,7 @@ static String serverIndex =
      </head>
      <body>
      <h1>SafeBoot</h1>
-     Chip: ${B}<br>SafeBoot: ${V}<br><br>
+     Chip: ${B}<br>SafeBoot-Version: ${V}<br><br>
      <form method='POST' action='' enctype='multipart/form-data'>
          <label for='firmware'><strong>Firmware:</strong></label>
          <br>
@@ -33,10 +35,6 @@ static const char* cancelResponse = "<META http-equiv=\"refresh\" content=\"10;U
 
 class HTTPUpdateServer {
   public:
-    static void setVersion(const char* version) {
-      serverIndex.replace("${V}", version);
-    }
-
     void setup(WebServer* server) {
       setup(server, "/update");
     }
@@ -44,10 +42,13 @@ class HTTPUpdateServer {
     void setup(WebServer* server, const String& path) {
       _server = server;
 
-      // Add chip model and flash size
-      String chipSpecs = ESP.getChipModel();
-      chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
-      serverIndex.replace("${B}", chipSpecs);
+      // Add chip model and flash size to Website
+      _chipSpecs = ESP.getChipModel();
+      _chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
+      serverIndex.replace("${B}", _chipSpecs);
+
+      // Add SafeBoot-Version to Website
+      serverIndex.replace("${V}", __COMPILED_APP_VERSION__);
 
       // handler for cancel
       _server->on(
@@ -117,4 +118,5 @@ class HTTPUpdateServer {
   private:
     WebServer* _server;
     String _updaterError;
+    String _chipSpecs;
 };

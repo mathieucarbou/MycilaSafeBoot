@@ -31,8 +31,6 @@ Mycila::Logger logger;
 
 #define TAG "SafeBoot"
 
-extern const char* __COMPILED_APP_VERSION__;
-
 static WebServer webServer(80);
 static HTTPUpdateServer httpUpdater;
 static Mycila::ESPConnect espConnect;
@@ -76,7 +74,6 @@ void setup() {
     esp_ota_set_boot_partition(partition);
   }
   // setup routes
-  httpUpdater.setVersion(__COMPILED_APP_VERSION__);
   httpUpdater.setup(&webServer, "/");
   webServer.onNotFound([]() {
     webServer.sendHeader("Location", "/");
