@@ -12,7 +12,8 @@ static String serverIndex =
          <meta name='viewport' content='width=device-width,initial-scale=1'/>
      </head>
      <body>
-     <h1>SafeBoot ${V}</h1>
+     <h1>SafeBoot</h1>
+     Chip: ${B}<br>SafeBoot: ${V}<br><br>
      <form method='POST' action='' enctype='multipart/form-data'>
          <label for='firmware'><strong>Firmware:</strong></label>
          <br>
@@ -42,6 +43,11 @@ class HTTPUpdateServer {
 
     void setup(WebServer* server, const String& path) {
       _server = server;
+
+      // Add chip model and flash size
+      String chipSpecs = ESP.getChipModel();
+      chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
+      serverIndex.replace("${B}", chipSpecs);
 
       // handler for cancel
       _server->on(

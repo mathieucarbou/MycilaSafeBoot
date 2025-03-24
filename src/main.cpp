@@ -76,7 +76,7 @@ void setup() {
     esp_ota_set_boot_partition(partition);
   }
   // setup routes
-  HTTPUpdateServer::setVersion(__COMPILED_APP_VERSION__);
+  httpUpdater.setVersion(__COMPILED_APP_VERSION__);
   httpUpdater.setup(&webServer, "/");
   webServer.onNotFound([]() {
     webServer.sendHeader("Location", "/");
