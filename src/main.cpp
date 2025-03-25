@@ -21,8 +21,6 @@
   #define LOG(format, ...)
 #endif
 
-extern const char* __COMPILED_APP_VERSION__;
-
 static WebServer webServer(80);
 static HTTPUpdateServer httpUpdater;
 static Mycila::ESPConnect espConnect;
@@ -50,7 +48,7 @@ void setup() {
   #endif
 #endif
 
-  LOG("SafeBoot Version: %s\n", __COMPILED_APP_VERSION__);
+  LOG("Version: %s\n", __COMPILED_APP_VERSION__);
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
@@ -59,7 +57,6 @@ void setup() {
   }
 
   // setup routes
-  HTTPUpdateServer::setVersion(__COMPILED_APP_VERSION__);
   httpUpdater.setup(&webServer, "/");
   webServer.onNotFound([]() {
     webServer.sendHeader("Location", "/");
@@ -102,11 +99,11 @@ void setup() {
   espConnect.begin(espConnectConfig.hostname.c_str(), "", espConnectConfig);
 
   if (espConnectConfig.apMode) {
-    LOG("Access Point: %s\n", espConnect.getAccessPointSSID().c_str());
+    LOG("AP: %s\n", espConnect.getAccessPointSSID().c_str());
   } else if (espConnect.getWiFiSSID().length()) {
     LOG("SSID: %s\n", espConnect.getWiFiSSID().c_str());
   }
-  LOG("IP Address: %s\n", espConnect.getIPAddress().toString().c_str());
+  LOG("IP: %s\n", espConnect.getIPAddress().toString().c_str());
   LOG("Hostname: %s\n", espConnect.getHostname().c_str());
 
   // start http
@@ -124,7 +121,7 @@ void setup() {
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
-  LOG("Arduino OTA Server started on port 3232\n");
+  LOG("OTA Server started on port 3232\n");
 }
 
 void loop() {

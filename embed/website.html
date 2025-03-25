@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>SafeBoot</title>
+    <style>
+      * {
+        margin: auto;
+        text-align: center;
+        font-family: Tahoma, Verdana, sans-serif;
+        color: black;
+        font-weight: normal;
+        padding: 0;
+      }
+
+      .shadow_container {
+        width: 80%;
+        max-width: 400px;
+        border-radius: 14px;
+        padding: 24px;
+        box-shadow: 0 2px 6px 0 rgba(0, 0, 0, 0.1),
+          0 4px 10px 0 rgba(0, 0, 0, 0.1);
+      }
+
+      .progress_container,
+      .result_container {
+        width: 100%;
+        display: none;
+        margin: auto;
+        padding-top: 50px;
+        padding-bottom: 50px;
+      }
+
+      .filename_text,
+      .result_text {
+        width: 100%;
+        font-size: 14px;
+        margin: 15px auto 10px auto;
+        padding-right: 5px;
+      }
+
+      .progress_bar_container {
+        display: flex;
+        width: 100%;
+        padding: 11px 0 30px 0;
+        margin: 12px auto auto auto;
+        max-width: 400px;
+      }
+
+      .progress_text_area {
+        width: 80px;
+        font-size: 16px;
+        color: black;
+        text-align: center;
+        margin-left: 0;
+        padding-left: 10px;
+        margin-right: auto;
+      }
+
+      .progress_bar {
+        width: 100%;
+        padding: 0;
+      }
+
+      .progress_bar_area {
+        width: 70%;
+        margin-right: 0;
+        margin-left: auto;
+      }
+
+      .drop_zone {
+        width: 100%;
+        border: 1px dashed gray;
+        border-radius: 10px;
+        padding-top: 30px;
+        padding-bottom: 30px;
+        margin-top: 15px;
+      }
+
+      .header {
+        width: 90%;
+        text-align: center;
+        padding: 0;
+        margin: 0 auto 0 auto;
+        max-width: 400px;
+      }
+
+      .column {
+        width: 100%;
+      }
+
+      .info_texts {
+        display: block;
+        width: 100%;
+        margin: 10px auto auto auto;
+        padding: 0;
+        font-size: 14px;
+      }
+
+      .info_text_container {
+        display: flex;
+        margin-top: 10px;
+      }
+
+      .info_text_name {
+        width: 35%;
+        margin-left: 0;
+        padding-left: 10px;
+        text-align: left;
+        color: black;
+      }
+
+      .info_text_value {
+        width: 65%;
+        margin-right: 0;
+        padding-right: 10px;
+        text-align: right;
+        color: gray;
+      }
+
+      p {
+        font-size: 18px;
+        color: gray;
+        margin: 0;
+      }
+
+      hr {
+        color: lightgray;
+        margin: 24px auto 14px auto;
+        width: 100%;
+      }
+
+      /* h1 {
+      text-align: center;
+      font-size: 24px;
+      display: none;
+      margin: 48px auto 24px auto;
+    } */
+
+      h1 {
+        text-align: center;
+        font-size: 24px;
+        display: block;
+        margin: 48px auto 24px auto;
+      }
+
+      h2 {
+        font-size: 18px;
+        margin: 0;
+      }
+
+      h5 {
+        font-size: 12px;
+        color: gray;
+        margin: 0 auto 12px auto;
+        padding: 0;
+      }
+
+      h6 {
+        font-size: 16px;
+        color: gray;
+        margin: 0;
+      }
+
+      button {
+        width: 100%;
+        padding: 8px;
+        border: none;
+        cursor: pointer;
+        margin-top: 16px;
+        font-size: 16px;
+        border-radius: 5px;
+        background: rgb(75, 75, 75);
+        color: white;
+        -webkit-touch-callout: none;
+        -webkit-user-select: none;
+        -khtml-user-select: none;
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+      }
+
+      .svg_badge {
+        margin-bottom: 15px;
+      }
+
+      .logo {
+        margin: 12px auto 0 auto;
+      }
+
+      h4 {
+        font-size: 16px;
+        color: gray;
+        margin: auto;
+      }
+
+      .mode_switch_container {
+        display: flex;
+        padding-left: 10px;
+        padding-right: 10px;
+      }
+
+      .toggle_switch_container {
+        width: 51px;
+        height: 26px;
+        position: relative;
+      }
+
+      .toggle_switch_checkbox {
+        opacity: 0;
+        width: 0;
+        height: 0;
+        position: absolute;
+      }
+
+      .toggle_switch_switch {
+        width: 100%;
+        height: 100%;
+        display: block;
+        background-color: rgb(75, 75, 75);
+        border-radius: 13px;
+        cursor: pointer;
+        transition: all 0.2s ease-out;
+      }
+
+      .toggle_switch_slider {
+        width: 20px;
+        height: 20px;
+        position: absolute;
+        left: calc(50% - 20px / 2 - 12px);
+        top: calc(50% - 20px / 2);
+        border-radius: 50%;
+        background: white;
+        transition: all 0.2s ease-out;
+        cursor: pointer;
+      }
+
+      .toggle_switch_checkbox:checked
+        + .toggle_switch_switch
+        .toggle_switch_slider {
+        left: calc(50% - 20px / 2 + 12px);
+        top: calc(50% - 20px / 2);
+      }
+
+      .loader_badge {
+        margin-bottom: 15px;
+        width: 65px;
+        height: 65px;
+      }
+
+      .loader_badge > .loader {
+        margin-top: 7px;
+        margin-bottom: 0;
+      }
+
+      .loader {
+        border: 6px solid lightgray;
+        border-radius: 50%;
+        border-top: 6px solid rgb(75, 75, 75);
+        margin-top: 69px;
+        width: 46px;
+        height: 46px;
+        -webkit-animation: spin 1s linear infinite;
+        animation: spin 1s linear infinite;
+        cursor: wait;
+      }
+
+      @-webkit-keyframes spin {
+        0% {
+          -webkit-transform: rotate(0deg);
+        }
+
+        100% {
+          -webkit-transform: rotate(360deg);
+        }
+      }
+
+      @keyframes spin {
+        0% {
+          transform: rotate(0deg);
+        }
+
+        100% {
+          transform: rotate(360deg);
+        }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="header">
+      <h1 id="title">SafeBoot Firmware Update</h1>
+      <!-- <img id="logo" src="/safeboot_logo" alt="Logo" class="logo"
+      onerror="document.getElementById('logo').remove();document.getElementById('title').style.display = 'block';" /> -->
+      <h5 id="help_text">
+        Upload a firmware/file system image here, or use Over-the-Air (OTA)
+        update in PlatformIO with Arduino OTA on port 3232.
+      </h5>
+    </div>
+    <div class="shadow_container">
+
+      <div class="mode_switch_container" id="mode_switch_container">
+        <h4 id="label_firmware">Firmware</h4>
+        <div class="toggle_switch_container">
+          <input
+            type="checkbox"
+            class="toggle_switch_checkbox"
+            id="toggle_switch_checkbox"
+          />
+          <label class="toggle_switch_switch" for="toggle_switch_checkbox">
+            <span class="toggle_switch_slider"></span>
+          </label>
+        </div>
+        <h4 id="label_filesystem">File System</h4>
+      </div>
+
+      <div class="drop_zone" id="drop_zone">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="24"
+          height="24"
+          viewBox="0 0 24 24"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="#0D0D0D"
+          id="svg_upload"
+        >
+          <path
+            d="M11 4a4 4 0 0 0-3.999 4.102 1 1 0 0 1-.75.992A3.002 3.002 0 0 0 7 15h1a1 1 0 1 1 0 2H7a5 5 0 0 1-1.97-9.596 6 6 0 0 1 11.169-2.4A6 6 0 0 1 16 17a1 1 0 1 1 0-2 4 4 0 1 0-.328-7.987 1 1 0 0 1-.999-.6A4.001 4.001 0 0 0 11 4zm.293 5.293a1 1 0 0 1 1.414 0l2 2a1 1 0 0 1-1.414 1.414L13 12.414V20a1 1 0 1 1-2 0v-7.586l-.293.293a1 1 0 0 1-1.414-1.414l2-2z"
+          ></path>
+        </svg>
+        <h2>Drag and drop here</h2>
+        <h6 id="clickable_file_input">or<br />click to select (.bin) file</h6>
+      </div>
+
+      <div class="progress_container" id="progress_container">
+        <div class="filename_text" id="filename_text">Uploading file:</div>
+        <div class="progress_bar_container">
+          <div class="progress_bar_area">
+            <progress
+              class="progress_bar"
+              id="progress_bar"
+              value="0"
+              max="100"
+            ></progress>
+          </div>
+          <div class="progress_text_area" id="progress_text">0 %</div>
+        </div>
+      </div>
+
+      <div class="result_container" id="result_container">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="72"
+          height="72"
+          viewBox="0 0 24 24"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="0"
+          fill="#16c79a"
+          class="svg_badge"
+          id="svg_success"
+        >
+          <path
+            d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm14.664-3.247a1 1 0 0 1 .083 1.411l-5.333 6a1 1 0 0 1-1.495 0l-2.666-3a1 1 0 0 1 1.494-1.328l1.92 2.159 4.586-5.16a1 1 0 0 1 1.411-.082z"
+          ></path>
+        </svg>
+
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="72"
+          height="72"
+          viewBox="0 0 24 24"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          stroke-width="0"
+          fill="#ec4646"
+          class="svg_badge"
+          id="svg_error"
+        >
+          <path
+            d="M12 4a8 8 0 1 0 0 16 8 8 0 0 0 0-16zM2 12C2 6.477 6.477 2 12 2s10 4.477 10 10-4.477 10-10 10S2 17.523 2 12zm5.793-4.207a1 1 0 0 1 1.414 0L12 10.586l2.793-2.793a1 1 0 1 1 1.414 1.414L13.414 12l2.793 2.793a1 1 0 0 1-1.414 1.414L12 13.414l-2.793 2.793a1 1 0 0 1-1.414-1.414L10.586 12 7.793 9.207a1 1 0 0 1 0-1.414z"
+          ></path>
+        </svg>
+
+        <div class="loader_badge" id="result_loader_animation">
+          <div class="loader"></div>
+        </div>
+
+        <div class="result_text" , id="result_text">OK!</div>
+      </div>
+
+      <div class="column" id="info_area">
+        <hr />
+        <div id="info_texts" class="info_texts">
+          <div id="info_text_chipspecs" class="info_text_container">
+            <div class="info_text_name">Chip:</div>
+            <div class="info_text_value" id="info_text_chip">Unknown</div>
+          </div>
+          <div id="info_text_buildname" class="info_text_container">
+            <div class="info_text_name">SafeBoot-Version:</div>
+            <div class="info_text_value" id="info_text_build">Unknown</div>
+          </div>
+        </div>
+        <button id="restart_button">Cancel SafeBoot</button>
+      </div>
+    </div>
+    <script>
+      const file_input = document.createElement("input");
+      const progress_bar = document.getElementById("progress_bar");
+      const progress_container = document.getElementById("progress_container");
+      const result_loader = document.getElementById("result_loader_animation");
+      const drop_zone = document.getElementById("drop_zone");
+      const progress_text = document.getElementById("progress_text");
+      const info_area = document.getElementById("info_area");
+      const result_container = document.getElementById("result_container");
+      const result_text = document.getElementById("result_text");
+      const svg_success = document.getElementById("svg_success");
+      const svg_error = document.getElementById("svg_error");
+      const restart_button = document.getElementById("restart_button");
+      const info_text_chip = document.getElementById("info_text_chip");
+      const info_text_build = document.getElementById("info_text_build");
+      const help_text = document.getElementById("help_text");
+      const clickable_file_input = document.getElementById(
+        "clickable_file_input"
+      );
+      const label_firmware = document.getElementById("label_firmware");
+      const label_filesystem = document.getElementById("label_filesystem");
+      const mode_container = document.getElementById("mode_switch_container");
+      const mode_checkbox = document.getElementById("toggle_switch_checkbox");
+      const info_text_chipspecs = document.getElementById(
+        "info_text_chipspecs"
+      );
+      const info_text_buildname = document.getElementById(
+        "info_text_buildname"
+      );
+
+      // Hack for captive portal on apple devices
+      // The browser is very limited and won't open a file upload dialog
+      // thus, we'll only present the option to drag-and-drop
+      if (
+        navigator.userAgent.match(
+          ".*(AppleWebKit){1}.*(\(KHTML, like Gecko\).?)$"
+        )
+      ) {
+        clickable_file_input.innerHTML =
+          "accepts<br />one firmware (.bin) file";
+      }
+
+      // fetch some text info from a given url
+      async function getInfo(info_url) {
+        try {
+          const response = await fetch(info_url);
+          if (!response.ok) {
+            throw new Error(`Response status: ${response.status}`);
+          }
+
+          const info_value = await response.text();
+
+          return info_value;
+        } catch (error) {
+          return "Unknown";
+        }
+      }
+
+      // get board name and safeboot version from webserver
+      async function getInfos() {
+        var chipspecs = await getInfo("/chipspecs");
+        if (chipspecs == "Unknown") {
+          info_text_chipspecs.style.display = "none";
+        }
+        info_text_chip.innerHTML = chipspecs;
+
+        var sbversion = await getInfo("/sbversion");
+        if (sbversion == "Unknown") {
+          info_text_buildname.style.display = "none";
+        }
+        info_text_build.innerHTML = sbversion;
+      }
+
+      getInfos();
+
+      label_firmware.style.color = "black";
+
+      mode_checkbox.addEventListener("change", function () {
+        if (mode_checkbox.checked) {
+          label_firmware.style.color = "gray";
+          label_filesystem.style.color = "black";
+        } else {
+          label_firmware.style.color = "black";
+          label_filesystem.style.color = "gray";
+        }
+      });
+
+      file_input.type = "file";
+      file_input.accept = ".bin";
+
+      file_input.addEventListener("change", () => {
+        if (file_input.files.length == 1) {
+          uploadFile(file_input.files);
+        }
+      });
+
+      drop_zone.addEventListener("click", (event) => {
+        event.stopPropagation();
+        file_input.click();
+      });
+
+      drop_zone.addEventListener("drop", (event) => {
+        event.preventDefault();
+        drop_zone.style.border = "1px dashed gray";
+        if (checkDropItems(event.dataTransfer.items)) {
+          uploadFile(event.dataTransfer.files);
+        } else {
+          drop_zone.animate(
+            [{ border: "1px solid red" }, { border: "1px dashed gray" }],
+            {
+              duration: 500,
+              iterations: 5,
+            }
+          );
+        }
+      });
+
+      drop_zone.addEventListener("dragover", (event) => {
+        event.preventDefault();
+        drop_zone.style.border = "1px solid gray";
+      });
+
+      drop_zone.addEventListener("dragleave", (event) => {
+        event.preventDefault();
+        drop_zone.style.border = "1px dashed gray";
+      });
+
+      restart_button.addEventListener("click", () => {
+        restartThingy();
+      });
+
+      async function restartThingy() {
+        showResultContainer();
+        result_text.innerHTML = "Processing...";
+        help_text.innerHTML = " ";
+
+        try {
+          const response = await fetch("/cancel", { method: "POST", body: "" });
+          if (!response.ok) {
+            throw new Error(`Failed! ${response.status}`);
+          }
+
+          result_loader.style.display = "none";
+          svg_success.style.display = "block";
+          result_text.innerHTML = "Success! " + (await response.text());
+        } catch (error) {
+          result_loader.style.display = "none";
+          svg_error.style.display = "block";
+          result_text.innerHTML = error.message;
+        } finally {
+          refreshHome(7500);
+        }
+      }
+
+      async function uploadFile(fileList) {
+        const fw_mode = mode_checkbox.checked ? "1" : "0";
+
+        var filename_text = document.getElementById("filename_text");
+        filename_text.innerHTML = "Uploading: " + fileList[0].name;
+        var data = new FormData();
+        data.append("file", fileList[0]);
+
+        showProgressContainer();
+        const url = "/?size=" + fileList[0].size + "&mode=" + fw_mode;
+        const xhr = new XMLHttpRequest();
+        xhr.upload.addEventListener("progress", (event) => {
+          updateProgressBar(event.loaded / event.total);
+        });
+        xhr.addEventListener("load", () => {
+          showResultContainer();
+          result_text.innerHTML = "Processing...";
+          help_text.innerHTML = " ";
+        });
+        xhr.addEventListener("loadend", uploadFinalSuccessHandler);
+        xhr.addEventListener("error", uploadErrorHandler);
+        xhr.open("POST", url);
+        xhr.send(data);
+      }
+
+      // data uploaded completely, show result and restart
+      function uploadFinalSuccessHandler(event) {
+        help_text.innerHTML = " ";
+        result_loader.style.display = "none";
+        if (this.status == 200) {
+          svg_success.style.display = "block";
+          result_text.innerHTML = "OTA successful! Rebooting...";
+        } else {
+          svg_error.style.display = "block";
+          result_text.innerHTML = "OTA failed! Rebooting...";
+        }
+
+        // it takes a few seconds before the device has restarted
+        // reloading "/" will actually load the homepage of the main-firmware
+        refreshHome(7500);
+      }
+
+      function uploadErrorHandler(event) {
+        showResultContainer();
+        help_text.innerHTML = " ";
+        svg_error.style.display = "block";
+        result_loader.style.display = "none";
+        result_text.innerHTML = "OTA failed! Rebooting...";
+
+        refreshHome(7500);
+      }
+
+      function refreshHome(timeout) {
+        window.setTimeout(function () {
+          window.open("/", "_self");
+        }, timeout);
+      }
+
+      function updateProgressBar(value) {
+        const percent = value * 100;
+        progress_bar.value = Math.round(percent);
+        progress_text.innerHTML = Math.round(percent, 0) + " %";
+      }
+
+      function checkDropItems(itemList) {
+        if (itemList.length != 1) {
+          return false;
+        }
+
+        if (itemList[0].kind != "file") {
+          return false;
+        }
+
+        if (
+          !itemList[0].type.match(
+            "^(application)+.[a-z]*.*(bin)+(ary)*|^(application)+.(octet-stream)$"
+          )
+        ) {
+          return false;
+        }
+
+        return true;
+      }
+
+      function showProgressContainer() {
+        drop_zone.style.display = "none";
+        progress_container.style.display = "block";
+        info_area.style.display = "none";
+        help_text.innerHTML = " ";
+        mode_container.style.display = "none";
+      }
+
+      function showResultContainer() {
+        drop_zone.style.display = "none";
+        progress_container.style.display = "none";
+        info_area.style.display = "none";
+        result_container.style.display = "block";
+        svg_success.style.display = "none";
+        svg_error.style.display = "none";
+        result_loader.style.display = "block";
+        help_text.innerHTML = " ";
+        mode_container.style.display = "none";
+      }
+    </script>
+  </body>
+</html>
