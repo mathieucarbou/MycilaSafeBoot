@@ -15,21 +15,11 @@
   #include <ESPmDNS.h>
 #endif
 
-#ifdef MYCILA_LOGGER_SUPPORT
-  #include <MycilaLogger.h>
-Mycila::Logger logger;
-  #define LOGD(tag, format, ...) logger.debug(tag, format, ##__VA_ARGS__)
-  #define LOGI(tag, format, ...) logger.info(tag, format, ##__VA_ARGS__)
-  #define LOGW(tag, format, ...) logger.warn(tag, format, ##__VA_ARGS__)
-  #define LOGE(tag, format, ...) logger.error(tag, format, ##__VA_ARGS__)
+#ifdef SAFEBOOT_LOGGING
+  #define LOG(format, ...) Serial.printf(format, ##__VA_ARGS__)
 #else
-  #define LOGD(tag, format, ...)
-  #define LOGI(tag, format, ...)
-  #define LOGW(tag, format, ...)
-  #define LOGE(tag, format, ...)
+  #define LOG(format, ...)
 #endif
-
-#define TAG "SafeBoot"
 
 extern const char* __COMPILED_APP_VERSION__;
 
@@ -49,7 +39,7 @@ static String getChipIDStr() {
 }
 
 void setup() {
-#ifdef MYCILA_LOGGER_SUPPORT
+#ifdef SAFEBOOT_LOGGING
   Serial.begin(115200);
   #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(0);
@@ -58,12 +48,9 @@ void setup() {
   while (!Serial)
     yield();
   #endif
-
-  logger.forwardTo(&Serial);
-  logger.setLevel(ARDUHAL_LOG_LEVEL_DEBUG);
 #endif
 
-  LOGI(TAG, "SafeBoot Version: %s", __COMPILED_APP_VERSION__);
+  LOG("SafeBoot Version: %s\n", __COMPILED_APP_VERSION__);
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
@@ -104,7 +91,7 @@ void setup() {
 
   espConnect.listen([](Mycila::ESPConnect::State previous, Mycila::ESPConnect::State state) {
     if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
-      LOGW(TAG, "Connect timeout! Starting AP mode...");
+      LOG("Connect timeout! Starting AP mode...\n");
       // if ETH DHCP times out, we start AP mode
       espConnectConfig.apMode = true;
       espConnect.setConfig(espConnectConfig);
@@ -114,18 +101,17 @@ void setup() {
   // connect...
   espConnect.begin(espConnectConfig.hostname.c_str(), "", espConnectConfig);
 
-  LOGI(TAG, "IP Address: %s", espConnect.getIPAddress().toString().c_str());
-  LOGI(TAG, "Hostname: %s", espConnect.getHostname().c_str());
-  if (espConnect.getWiFiSSID().length()) {
-    LOGI(TAG, "SSID: %s", espConnect.getWiFiSSID().c_str());
-  }
   if (espConnectConfig.apMode) {
-    LOGI(TAG, "Access Point: %s", espConnect.getAccessPointSSID().c_str());
+    LOG("Access Point: %s\n", espConnect.getAccessPointSSID().c_str());
+  } else if (espConnect.getWiFiSSID().length()) {
+    LOG("SSID: %s\n", espConnect.getWiFiSSID().c_str());
   }
+  LOG("IP Address: %s\n", espConnect.getIPAddress().toString().c_str());
+  LOG("Hostname: %s\n", espConnect.getHostname().c_str());
 
   // start http
   webServer.begin();
-  LOGI(TAG, "Web Server started");
+  LOG("Web Server started\n");
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
   // Start mDNS
@@ -138,7 +124,7 @@ void setup() {
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
-  LOGI(TAG, "Arduino OTA Server started on port 3232");
+  LOG("Arduino OTA Server started on port 3232\n");
 }
 
 void loop() {
