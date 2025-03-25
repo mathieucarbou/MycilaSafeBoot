@@ -64,7 +64,6 @@ void setup() {
 #endif
 
   LOGI(TAG, "SafeBoot Version: %s", __COMPILED_APP_VERSION__);
-  LOGI(TAG, "Chip ID: %s", getChipIDStr().c_str());
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
@@ -105,7 +104,7 @@ void setup() {
 
   espConnect.listen([](Mycila::ESPConnect::State previous, Mycila::ESPConnect::State state) {
     if (state == Mycila::ESPConnect::State::NETWORK_TIMEOUT) {
-      LOGW(TAG, "Connect timeout! Starting AP mode instead...");
+      LOGW(TAG, "Connect timeout! Starting AP mode...");
       // if ETH DHCP times out, we start AP mode
       espConnectConfig.apMode = true;
       espConnect.setConfig(espConnectConfig);
@@ -115,19 +114,18 @@ void setup() {
   // connect...
   espConnect.begin(espConnectConfig.hostname.c_str(), "", espConnectConfig);
 
-  LOGI(TAG, "Connected to network!");
   LOGI(TAG, "IP Address: %s", espConnect.getIPAddress().toString().c_str());
   LOGI(TAG, "Hostname: %s", espConnect.getHostname().c_str());
   if (espConnect.getWiFiSSID().length()) {
-    LOGI(TAG, "WiFi SSID: %s", espConnect.getWiFiSSID().c_str());
+    LOGI(TAG, "SSID: %s", espConnect.getWiFiSSID().c_str());
   }
   if (espConnectConfig.apMode) {
     LOGI(TAG, "Access Point: %s", espConnect.getAccessPointSSID().c_str());
   }
 
-  // starte http
-  LOGI(TAG, "Starting HTTP server...");
+  // start http
   webServer.begin();
+  LOGI(TAG, "Web Server started");
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
   // Start mDNS
@@ -136,13 +134,11 @@ void setup() {
 #endif
 
   // Start OTA
-  LOGI(TAG, "Starting OTA server...");
   ArduinoOTA.setHostname(espConnectConfig.hostname.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
-
-  LOGI(TAG, "Done!");
+  LOGI(TAG, "Arduino OTA Server started on port 3232");
 }
 
 void loop() {
