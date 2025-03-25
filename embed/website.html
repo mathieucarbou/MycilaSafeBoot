@@ -75,6 +75,7 @@
         border-radius: 10px;
         padding-top: 30px;
         padding-bottom: 30px;
+        margin-top: 15px;
       }
 
       .header {
@@ -196,7 +197,6 @@
 
       .mode_switch_container {
         display: flex;
-        margin-top: 15px;
         padding-left: 10px;
         padding-right: 10px;
       }
@@ -299,6 +299,22 @@
       </h5>
     </div>
     <div class="shadow_container">
+
+      <div class="mode_switch_container" id="mode_switch_container">
+        <h4 id="label_firmware">Firmware</h4>
+        <div class="toggle_switch_container">
+          <input
+            type="checkbox"
+            class="toggle_switch_checkbox"
+            id="toggle_switch_checkbox"
+          />
+          <label class="toggle_switch_switch" for="toggle_switch_checkbox">
+            <span class="toggle_switch_slider"></span>
+          </label>
+        </div>
+        <h4 id="label_filesystem">File System</h4>
+      </div>
+
       <div class="drop_zone" id="drop_zone">
         <svg
           xmlns="http://www.w3.org/2000/svg"
@@ -316,21 +332,6 @@
         </svg>
         <h2>Drag and drop here</h2>
         <h6 id="clickable_file_input">or<br />click to select (.bin) file</h6>
-      </div>
-
-      <div class="mode_switch_container" id="mode_switch_container">
-        <h4 id="label_firmware">Firmware</h4>
-        <div class="toggle_switch_container">
-          <input
-            type="checkbox"
-            class="toggle_switch_checkbox"
-            id="toggle_switch_checkbox"
-          />
-          <label class="toggle_switch_switch" for="toggle_switch_checkbox">
-            <span class="toggle_switch_slider"></span>
-          </label>
-        </div>
-        <h4 id="label_filesystem">File System</h4>
       </div>
 
       <div class="progress_container" id="progress_container">
