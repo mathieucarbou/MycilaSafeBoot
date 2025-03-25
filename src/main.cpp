@@ -37,7 +37,6 @@ static WebServer webServer(80);
 static HTTPUpdateServer httpUpdater;
 static Mycila::ESPConnect espConnect;
 static Mycila::ESPConnect::Config espConnectConfig;
-static String hostname;
 
 static String getChipIDStr() {
   uint32_t chipId = 0;
@@ -64,17 +63,15 @@ void setup() {
   logger.setLevel(ARDUHAL_LOG_LEVEL_DEBUG);
 #endif
 
-  // Init hostname
-  hostname = "SafeBoot-" + getChipIDStr();
   LOGI(TAG, "SafeBoot Version: %s", __COMPILED_APP_VERSION__);
   LOGI(TAG, "Chip ID: %s", getChipIDStr().c_str());
-  LOGI(TAG, "Hostname: %s", hostname.c_str());
 
   // Set next boot partition
   const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
   if (partition) {
     esp_ota_set_boot_partition(partition);
   }
+
   // setup routes
   HTTPUpdateServer::setVersion(__COMPILED_APP_VERSION__);
   httpUpdater.setup(&webServer, "/");
@@ -87,6 +84,11 @@ void setup() {
   espConnect.loadConfiguration(espConnectConfig);
   espConnect.setBlocking(true);
   espConnect.setAutoRestart(false);
+
+  // reuse a potentially set hostname from main app, or set a default one
+  if (!espConnectConfig.hostname.length()) {
+    espConnectConfig.hostname = "SafeBoot-" + getChipIDStr();
+  }
 
   // If the passed config is to be in AP mode, or has a SSID that's fine.
   // If the passed config is empty, we need to check if the board supports ETH.
@@ -111,13 +113,16 @@ void setup() {
   });
 
   // connect...
-  espConnect.begin(hostname.c_str(), hostname.c_str(), "", espConnectConfig);
+  espConnect.begin(espConnectConfig.hostname.c_str(), "", espConnectConfig);
 
   LOGI(TAG, "Connected to network!");
   LOGI(TAG, "IP Address: %s", espConnect.getIPAddress().toString().c_str());
   LOGI(TAG, "Hostname: %s", espConnect.getHostname().c_str());
   if (espConnect.getWiFiSSID().length()) {
     LOGI(TAG, "WiFi SSID: %s", espConnect.getWiFiSSID().c_str());
+  }
+  if (espConnectConfig.apMode) {
+    LOGI(TAG, "Access Point: %s", espConnect.getAccessPointSSID().c_str());
   }
 
   // starte http
@@ -126,13 +131,13 @@ void setup() {
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
   // Start mDNS
-  MDNS.begin(hostname.c_str());
+  MDNS.begin(espConnectConfig.hostname.c_str());
   MDNS.addService("http", "tcp", 80);
 #endif
 
   // Start OTA
   LOGI(TAG, "Starting OTA server...");
-  ArduinoOTA.setHostname(hostname.c_str());
+  ArduinoOTA.setHostname(espConnectConfig.hostname.c_str());
   ArduinoOTA.setRebootOnSuccess(true);
   ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
