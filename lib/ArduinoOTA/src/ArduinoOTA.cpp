@@ -21,7 +21,6 @@
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
 #include "ESPmDNS.h"
 #endif
-#include "MD5Builder.h"
 #include "Update.h"
 
 // #define OTA_DEBUG Serial
@@ -72,26 +71,6 @@ String ArduinoOTAClass::getHostname() {
   return _hostname;
 }
 
-ArduinoOTAClass& ArduinoOTAClass::setPassword(const char* password) {
-  if (_state == OTA_IDLE && password) {
-    MD5Builder passmd5;
-    passmd5.begin();
-    passmd5.add(password);
-    passmd5.calculate();
-    _password.clear();
-    _password = passmd5.toString();
-  }
-  return *this;
-}
-
-ArduinoOTAClass& ArduinoOTAClass::setPasswordHash(const char* password) {
-  if (_state == OTA_IDLE && password) {
-    _password.clear();
-    _password = password;
-  }
-  return *this;
-}
-
 ArduinoOTAClass& ArduinoOTAClass::setPartitionLabel(const char* partition_label) {
   if (_state == OTA_IDLE && partition_label) {
     _partition_label.clear();
@@ -140,7 +119,7 @@ void ArduinoOTAClass::begin() {
 #ifdef CONFIG_MDNS_MAX_INTERFACES
   if (_mdnsEnabled) {
     MDNS.begin(_hostname.c_str());
-    MDNS.enableArduino(_port, (_password.length() > 0));
+    MDNS.enableArduino(_port, false);
   }
 #endif
 #endif
@@ -197,64 +176,11 @@ void ArduinoOTAClass::_onRx() {
       return;
     }
 
-    if (_password.length()) {
-      MD5Builder nonce_md5;
-      nonce_md5.begin();
-      nonce_md5.add(String(micros()));
-      nonce_md5.calculate();
-      _nonce = nonce_md5.toString();
-
-      _udp_ota.beginPacket(_udp_ota.remoteIP(), _udp_ota.remotePort());
-      _udp_ota.printf("AUTH %s", _nonce.c_str());
-      _udp_ota.endPacket();
-      _state = OTA_WAITAUTH;
-      return;
-    } else {
-      _udp_ota.beginPacket(_udp_ota.remoteIP(), _udp_ota.remotePort());
-      _udp_ota.print("OK");
-      _udp_ota.endPacket();
-      _ota_ip = _udp_ota.remoteIP();
-      _state = OTA_RUNUPDATE;
-    }
-  } else if (_state == OTA_WAITAUTH) {
-    int cmd = parseInt();
-    if (cmd != U_AUTH) {
-      log_e("%d was expected. got %d instead", U_AUTH, cmd);
-      _state = OTA_IDLE;
-      return;
-    }
-    _udp_ota.read();
-    String cnonce = readStringUntil(' ');
-    String response = readStringUntil('\n');
-    if (cnonce.length() != 32 || response.length() != 32) {
-      log_e("auth param fail");
-      _state = OTA_IDLE;
-      return;
-    }
-
-    String challenge = _password + ":" + String(_nonce) + ":" + cnonce;
-    MD5Builder _challengemd5;
-    _challengemd5.begin();
-    _challengemd5.add(challenge);
-    _challengemd5.calculate();
-    String result = _challengemd5.toString();
-
-    if (result.equals(response)) {
-      _udp_ota.beginPacket(_udp_ota.remoteIP(), _udp_ota.remotePort());
-      _udp_ota.print("OK");
-      _udp_ota.endPacket();
-      _ota_ip = _udp_ota.remoteIP();
-      _state = OTA_RUNUPDATE;
-    } else {
-      _udp_ota.beginPacket(_udp_ota.remoteIP(), _udp_ota.remotePort());
-      _udp_ota.print("Authentication Failed");
-      log_w("Authentication Failed");
-      _udp_ota.endPacket();
-      if (_error_callback) {
-        _error_callback(OTA_AUTH_ERROR);
-      }
-      _state = OTA_IDLE;
-    }
+    _udp_ota.beginPacket(_udp_ota.remoteIP(), _udp_ota.remotePort());
+    _udp_ota.print("OK");
+    _udp_ota.endPacket();
+    _ota_ip = _udp_ota.remoteIP();
+    _state = OTA_RUNUPDATE;
   }
 }
 

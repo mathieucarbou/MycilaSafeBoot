@@ -23,12 +23,10 @@
 
 typedef enum {
   OTA_IDLE,
-  OTA_WAITAUTH,
   OTA_RUNUPDATE
 } ota_state_t;
 
 typedef enum {
-  OTA_AUTH_ERROR,
   OTA_BEGIN_ERROR,
   OTA_CONNECT_ERROR,
   OTA_RECEIVE_ERROR,
@@ -50,12 +48,6 @@ class ArduinoOTAClass {
     // Sets the device hostname. Default esp32-xxxxxx
     ArduinoOTAClass& setHostname(const char* hostname);
     String getHostname();
-
-    // Sets the password that will be required for OTA. Default NULL
-    ArduinoOTAClass& setPassword(const char* password);
-
-    // Sets the password as above but in the form MD5(password). Default NULL
-    ArduinoOTAClass& setPasswordHash(const char* password);
 
     // Sets the partition label to write to when updating SPIFFS. Default NULL
     ArduinoOTAClass& setPartitionLabel(const char* partition_label);
@@ -95,7 +87,6 @@ class ArduinoOTAClass {
 
   private:
     int _port;
-    String _password;
     String _hostname;
     String _partition_label;
     String _nonce;
