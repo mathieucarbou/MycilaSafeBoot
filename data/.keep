@@ -1,0 +1,1 @@
+This folder is left empty to be able to generate an FS image with: pio run -e esp32dev -t buildfs
