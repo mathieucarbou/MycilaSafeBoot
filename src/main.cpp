@@ -7,8 +7,9 @@
 #include <HardwareSerial.h>
 #include <MycilaESPConnect.h>
 #include <StreamString.h>
-#include <WebServer.h>
+// #include <WebServer.h>
 
+#include <esp_http_server.h>
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
 
@@ -22,16 +23,21 @@
   #define LOG(format, ...)
 #endif
 
+#define SCRATCH_BUFSIZE 8192
+
 extern const char* __COMPILED_APP_VERSION__;
 extern const uint8_t update_html_start[] asm("_binary__pio_embed_website_html_gz_start");
 extern const uint8_t update_html_end[] asm("_binary__pio_embed_website_html_gz_end");
 static const char* successResponse = "Update Success! Rebooting...";
 static const char* cancelResponse = "Rebooting...";
 
-static WebServer webServer(80);
 static Mycila::ESPConnect espConnect;
 static Mycila::ESPConnect::Config espConnectConfig;
 static StreamString updaterError;
+
+// static WebServer webServer(80);
+httpd_handle_t server = NULL;
+httpd_config_t config = HTTPD_DEFAULT_CONFIG();
 
 static String getChipIDStr() {
   uint32_t chipId = 0;
@@ -43,71 +49,224 @@ static String getChipIDStr() {
   return espId;
 }
 
-static void start_web_server() {
-  webServer.on("/cancel", HTTP_POST, [&]() {
-      webServer.send(200, "text/plain", cancelResponse);
-      webServer.client().stop();
-      delay(500);
-      ESP.restart(); }, [&]() {});
+// 404
+esp_err_t handler_404(httpd_req_t* req, httpd_err_code_t err) {
+  httpd_resp_set_status(req, "302 Temporary Redirect");
+  httpd_resp_set_hdr(req, "Location", "/");
+  return ESP_OK;
+}
 
-  webServer.on("/", HTTP_GET, [&]() {
-    webServer.sendHeader("Content-Encoding", "gzip");
-    webServer.send_P(200, "text/html", reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
-  });
+// GET /
+static esp_err_t handler_get_root(httpd_req_t* req) {
+  httpd_resp_set_type(req, "text/html");
+  httpd_resp_set_hdr(req, "Content-Encoding", "gzip");
+  httpd_resp_send(req, reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
+  return ESP_OK;
+}
+static const httpd_uri_t route_get_root = {
+  .uri = "/",
+  .method = HTTP_GET,
+  .handler = handler_get_root,
+};
 
-  webServer.on("/", HTTP_POST, [&]() {
-      if (Update.hasError()) {
-        webServer.send(500, "text/plain", "Update error: " + updaterError);
-      } else {
-        webServer.client().setNoDelay(true);
-        webServer.send(200, "text/plain", successResponse);
-        webServer.client().stop();
-        delay(500);
-        ESP.restart();
-      } }, [&]() {
-      // handler for the file upload, gets the sketch bytes, and writes
-      // them through the Update object
-      HTTPUpload& upload = webServer.upload();
+// GET /chipspecs
+static esp_err_t handler_get_chip(httpd_req_t* req) {
+  String chipSpecs = ESP.getChipModel();
+  chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
+  httpd_resp_set_type(req, "text/plain");
+  httpd_resp_sendstr(req, chipSpecs.c_str());
+  return ESP_OK;
+}
+static const httpd_uri_t route_get_chip = {
+  .uri = "/chipspecs",
+  .method = HTTP_GET,
+  .handler = handler_get_chip,
+};
 
-      if (upload.status == UPLOAD_FILE_START) {
-        updaterError.clear();
-        int otaMode = U_FLASH;
-        if (webServer.hasArg("mode") && webServer.arg("mode") == "1") {
-          otaMode = U_SPIFFS;
-        }
-        LOG("Mode: %d\n", otaMode);
-        if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode)) { // start with max available size
-          Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_WRITE && !updaterError.length()) {
-        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-          Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_END && !updaterError.length()) {
-        if (!Update.end(true)) { // true to set the size to the current progress
-          Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_ABORTED) {
-        Update.end();
+// GET /sbversion
+static esp_err_t handler_get_version(httpd_req_t* req) {
+  httpd_resp_set_type(req, "text/plain");
+  httpd_resp_sendstr(req, __COMPILED_APP_VERSION__);
+  return ESP_OK;
+}
+static const httpd_uri_t route_get_version = {
+  .uri = "/sbversion",
+  .method = HTTP_GET,
+  .handler = handler_get_version,
+};
+
+// POST /cancel
+static esp_err_t handler_post_cancel(httpd_req_t* req) {
+  httpd_resp_set_hdr(req, "Connection", "close");
+  httpd_resp_set_type(req, "text/plain");
+  httpd_resp_sendstr(req, cancelResponse);
+
+  delay(1000);
+  ESP.restart();
+
+  return ESP_OK;
+}
+static const httpd_uri_t route_post_cancel = {
+  .uri = "/cancel",
+  .method = HTTP_POST,
+  .handler = handler_post_cancel,
+};
+
+// POST /
+static char scratch[SCRATCH_BUFSIZE];
+static esp_err_t handler_post_root(httpd_req_t* req) {
+  int otaMode = U_FLASH;
+
+  char* buffer = nullptr;
+  size_t buffer_len;
+
+  // parse query params
+  buffer_len = httpd_req_get_url_query_len(req) + 1;
+  if (buffer_len > 1) {
+    buffer = new char[buffer_len];
+    if (httpd_req_get_url_query_str(req, buffer, buffer_len) == ESP_OK) {
+      if (strstr(buffer, "mode=1")) {
+        otaMode = U_SPIFFS;
       }
-      delay(0); });
+    }
+    delete[] buffer;
+  }
+  LOG("Mode: %d\n", otaMode);
 
-  webServer.on("/chipspecs", HTTP_GET, [&]() {
-    String chipSpecs = ESP.getChipModel();
-    chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
-    webServer.send(200, "text/plain", chipSpecs.c_str());
-  });
+  if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode)) {
+    updaterError.concat("Update error: ");
+    Update.printError(updaterError);
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, updaterError.c_str());
+    return ESP_FAIL;
+  }
 
-  webServer.on("/sbversion", HTTP_GET, [&]() {
-    webServer.send(200, "text/plain", __COMPILED_APP_VERSION__);
-  });
+  int received;
+  int remaining = req->content_len;
 
-  webServer.onNotFound([]() {
-    webServer.sendHeader("Location", "/");
-    webServer.send(302, "text/plain", "");
-  });
+  while (remaining > 0) {
+    if ((received = httpd_req_recv(req, scratch, min(remaining, SCRATCH_BUFSIZE))) <= 0) {
+      if (received == HTTPD_SOCK_ERR_TIMEOUT) {
+        /* Retry if timeout occurred */
+        continue;
+      }
 
-  webServer.begin();
+      Update.end();
+      httpd_resp_set_type(req, "text/plain");
+      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, "Failed to receive file");
+      return ESP_FAIL;
+    }
+
+    if (Update.write((uint8_t*)buffer, received) != received) {
+      updaterError.concat("Update error: ");
+      Update.printError(updaterError);
+      httpd_resp_set_type(req, "text/plain");
+      httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, updaterError.c_str());
+      return ESP_FAIL;
+    }
+
+    remaining -= received;
+  }
+
+  if (!Update.end(true)) {
+    updaterError.concat("Update error: ");
+    Update.printError(updaterError);
+    httpd_resp_set_type(req, "text/plain");
+    httpd_resp_send_err(req, HTTPD_500_INTERNAL_SERVER_ERROR, updaterError.c_str());
+    return ESP_FAIL;
+  }
+
+  httpd_resp_set_hdr(req, "Connection", "close");
+  httpd_resp_set_type(req, "text/plain");
+  httpd_resp_sendstr(req, successResponse);
+
+  delay(1000);
+  ESP.restart();
+
+  return ESP_OK;
+}
+static const httpd_uri_t route_post_root = {
+  .uri = "/",
+  .method = HTTP_POST,
+  .handler = handler_post_root,
+};
+
+static void start_web_server() {
+  config.lru_purge_enable = true;
+
+  ESP_ERROR_CHECK(httpd_start(&server, &config));
+
+  httpd_register_err_handler(server, HTTPD_404_NOT_FOUND, handler_404);
+  httpd_register_uri_handler(server, &route_get_root);
+  httpd_register_uri_handler(server, &route_get_chip);
+  httpd_register_uri_handler(server, &route_get_version);
+  httpd_register_uri_handler(server, &route_post_cancel);
+  httpd_register_uri_handler(server, &route_post_root);
+
+  // webServer.onNotFound([]() {
+  //   webServer.sendHeader("Location", "/");
+  //   webServer.send(302, "text/plain", "");
+  // });
+
+  // webServer.on("/", HTTP_GET, [&]() {
+  //   webServer.sendHeader("Content-Encoding", "gzip");
+  //   webServer.send_P(200, "text/html", reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
+  // });
+
+  // webServer.on("/chipspecs", HTTP_GET, [&]() {
+  //   String chipSpecs = ESP.getChipModel();
+  //   chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
+  //   webServer.send(200, "text/plain", chipSpecs.c_str());
+  // });
+
+  // webServer.on("/sbversion", HTTP_GET, [&]() {
+  //   webServer.send(200, "text/plain", __COMPILED_APP_VERSION__);
+  // });
+
+  // webServer.on("/cancel", HTTP_POST, [&]() {
+  //     webServer.send(200, "text/plain", cancelResponse);
+  //     webServer.client().stop();
+  //     delay(1000);
+  //     ESP.restart(); }, [&]() {});
+
+  // webServer.on("/", HTTP_POST, [&]() {
+  //     if (Update.hasError()) {
+  //       webServer.send(500, "text/plain", "Update error: " + updaterError);
+  //     } else {
+  //       webServer.client().setNoDelay(true);
+  //       webServer.send(200, "text/plain", successResponse);
+  //       webServer.client().stop();
+  //       delay(500);
+  //       ESP.restart();
+  //     } }, [&]() {
+  //     // handler for the file upload, gets the sketch bytes, and writes
+  //     // them through the Update object
+  //     HTTPUpload& upload = webServer.upload();
+
+  //     if (upload.status == UPLOAD_FILE_START) {
+  //       updaterError.clear();
+  //       int otaMode = U_FLASH;
+  //       if (webServer.hasArg("mode") && webServer.arg("mode") == "1") {
+  //         otaMode = U_SPIFFS;
+  //       }
+  //       LOG("Mode: %d\n", otaMode);
+  //       if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode)) { // start with max available size
+  //         Update.printError(updaterError);
+  //       }
+  //     } else if (upload.status == UPLOAD_FILE_WRITE && !updaterError.length()) {
+  //       if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
+  //         Update.printError(updaterError);
+  //       }
+  //     } else if (upload.status == UPLOAD_FILE_END && !updaterError.length()) {
+  //       if (!Update.end(true)) { // true to set the size to the current progress
+  //         Update.printError(updaterError);
+  //       }
+  //     } else if (upload.status == UPLOAD_FILE_ABORTED) {
+  //       Update.end();
+  //     }
+  //     delay(0); });
+
+  // webServer.begin();
 
 #ifndef MYCILA_SAFEBOOT_NO_MDNS
   MDNS.addService("http", "tcp", 80);
@@ -204,6 +363,6 @@ void setup() {
 }
 
 void loop() {
-  webServer.handleClient();
+  // webServer.handleClient();
   ArduinoOTA.handle();
 }
