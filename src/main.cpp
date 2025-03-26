@@ -44,37 +44,59 @@ static String getChipIDStr() {
 }
 
 static void start_web_server() {
-  webServer.on("/cancel", HTTP_POST, [&]() {
+  webServer.onNotFound([]() {
+    webServer.sendHeader("Location", "/");
+    webServer.send(302, "text/plain", "");
+  });
+
+  webServer.on("/chipspecs", HTTP_GET, [&]() {
+    String chipSpecs = ESP.getChipModel();
+    chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
+    webServer.send(200, "text/plain", chipSpecs.c_str());
+  });
+
+  webServer.on("/sbversion", HTTP_GET, [&]() {
+    webServer.send(200, "text/plain", __COMPILED_APP_VERSION__);
+  });
+
+  webServer.on(
+    "/cancel",
+    HTTP_POST,
+    [&]() {
       webServer.send(200, "text/plain", cancelResponse);
       webServer.client().stop();
-      delay(500);
-      ESP.restart(); }, [&]() {});
+      delay(1000);
+      ESP.restart();
+    },
+    [&]() {
+    });
 
   webServer.on("/", HTTP_GET, [&]() {
     webServer.sendHeader("Content-Encoding", "gzip");
     webServer.send_P(200, "text/html", reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
   });
 
-  webServer.on("/", HTTP_POST, [&]() {
+  webServer.on(
+    "/",
+    HTTP_POST,
+    [&]() {
       if (Update.hasError()) {
         webServer.send(500, "text/plain", "Update error: " + updaterError);
       } else {
         webServer.client().setNoDelay(true);
         webServer.send(200, "text/plain", successResponse);
         webServer.client().stop();
-        delay(500);
+        delay(1000);
         ESP.restart();
-      } }, [&]() {
+      } },
+    [&]() {
       // handler for the file upload, gets the sketch bytes, and writes
       // them through the Update object
       HTTPUpload& upload = webServer.upload();
 
       if (upload.status == UPLOAD_FILE_START) {
         updaterError.clear();
-        int otaMode = U_FLASH;
-        if (webServer.hasArg("mode") && webServer.arg("mode") == "1") {
-          otaMode = U_SPIFFS;
-        }
+        int otaMode = webServer.hasArg("mode") && webServer.arg("mode") == "1" ? U_SPIFFS : U_FLASH;
         LOG("Mode: %d\n", otaMode);
         if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode)) { // start with max available size
           Update.printError(updaterError);
@@ -90,22 +112,7 @@ static void start_web_server() {
       } else if (upload.status == UPLOAD_FILE_ABORTED) {
         Update.end();
       }
-      delay(0); });
-
-  webServer.on("/chipspecs", HTTP_GET, [&]() {
-    String chipSpecs = ESP.getChipModel();
-    chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
-    webServer.send(200, "text/plain", chipSpecs.c_str());
-  });
-
-  webServer.on("/sbversion", HTTP_GET, [&]() {
-    webServer.send(200, "text/plain", __COMPILED_APP_VERSION__);
-  });
-
-  webServer.onNotFound([]() {
-    webServer.sendHeader("Location", "/");
-    webServer.send(302, "text/plain", "");
-  });
+    });
 
   webServer.begin();
 
