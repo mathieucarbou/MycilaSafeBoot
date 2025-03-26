@@ -4,10 +4,10 @@
  */
 
 #include <ArduinoOTA.h>
+#include <ESPAsyncWebServer.h>
 #include <HardwareSerial.h>
 #include <MycilaESPConnect.h>
 #include <StreamString.h>
-#include <WebServer.h>
 
 #include <esp_ota_ops.h>
 #include <esp_partition.h>
@@ -28,7 +28,7 @@ extern const uint8_t update_html_end[] asm("_binary__pio_embed_website_html_gz_e
 static const char* successResponse = "Update Success! Rebooting...";
 static const char* cancelResponse = "Rebooting...";
 
-static WebServer webServer(80);
+static AsyncWebServer webServer(80);
 static Mycila::ESPConnect espConnect;
 static Mycila::ESPConnect::Config espConnectConfig;
 static StreamString updaterError;
@@ -44,67 +44,59 @@ static String getChipIDStr() {
 }
 
 static void start_web_server() {
-  webServer.on("/cancel", HTTP_POST, [&]() {
-      webServer.send(200, "text/plain", cancelResponse);
-      webServer.client().stop();
-      delay(500);
-      ESP.restart(); }, [&]() {});
-
-  webServer.on("/", HTTP_GET, [&]() {
-    webServer.sendHeader("Content-Encoding", "gzip");
-    webServer.send_P(200, "text/html", reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
+  webServer.on("/cancel", HTTP_POST, [](AsyncWebServerRequest* request) {
+    request->onDisconnect([]() {
+      delay(1000);
+      ESP.restart();
+    });
+    request->send(200, "text/plain", cancelResponse);
   });
 
-  webServer.on("/", HTTP_POST, [&]() {
-      if (Update.hasError()) {
-        webServer.send(500, "text/plain", "Update error: " + updaterError);
+  webServer.on("/", HTTP_GET, [](AsyncWebServerRequest* request) {
+    AsyncWebServerResponse* response = request->beginResponse(200, "text/html", update_html_start, update_html_end - update_html_start);
+    response->addHeader("Content-Encoding", "gzip");
+    request->send(response);
+  });
+
+  webServer.on(
+    "/",
+    HTTP_POST,
+    [](AsyncWebServerRequest* request) {
+      if (Update.hasError() || updaterError.length()) {
+        request->send(500, "text/plain", "Update error: " + updaterError);
       } else {
-        webServer.client().setNoDelay(true);
-        webServer.send(200, "text/plain", successResponse);
-        webServer.client().stop();
-        delay(500);
-        ESP.restart();
-      } }, [&]() {
-      // handler for the file upload, gets the sketch bytes, and writes
-      // them through the Update object
-      HTTPUpload& upload = webServer.upload();
-
-      if (upload.status == UPLOAD_FILE_START) {
+        request->onDisconnect([]() {
+          delay(1000);
+          ESP.restart();
+        });
+        request->send(200, "text/plain", successResponse);
+      } },
+    [](AsyncWebServerRequest* request, String filename, size_t index, uint8_t* data, size_t len, bool final) {
+      if (!index) {
         updaterError.clear();
-        int otaMode = U_FLASH;
-        if (webServer.hasArg("mode") && webServer.arg("mode") == "1") {
-          otaMode = U_SPIFFS;
-        }
+        int otaMode = request->hasParam("mode") && request->getParam("mode")->value() == "1" ? U_SPIFFS : U_FLASH;
         LOG("Mode: %d\n", otaMode);
-        if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode)) { // start with max available size
+        if (!Update.begin(UPDATE_SIZE_UNKNOWN, otaMode))
           Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_WRITE && !updaterError.length()) {
-        if (Update.write(upload.buf, upload.currentSize) != upload.currentSize) {
-          Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_END && !updaterError.length()) {
-        if (!Update.end(true)) { // true to set the size to the current progress
-          Update.printError(updaterError);
-        }
-      } else if (upload.status == UPLOAD_FILE_ABORTED) {
-        Update.end();
       }
-      delay(0); });
+      if (len && !updaterError.length() && Update.write(data, len) != len)
+        Update.printError(updaterError);
+      if (final && !updaterError.length() && !Update.end(true))
+        Update.printError(updaterError);
+    });
 
-  webServer.on("/chipspecs", HTTP_GET, [&]() {
+  webServer.on("/chipspecs", HTTP_GET, [](AsyncWebServerRequest* request) {
     String chipSpecs = ESP.getChipModel();
     chipSpecs += " (" + String(ESP.getFlashChipSize() >> 20) + " MB)";
-    webServer.send(200, "text/plain", chipSpecs.c_str());
+    request->send(200, "text/plain", chipSpecs.c_str());
   });
 
-  webServer.on("/sbversion", HTTP_GET, [&]() {
-    webServer.send(200, "text/plain", __COMPILED_APP_VERSION__);
+  webServer.on("/sbversion", HTTP_GET, [](AsyncWebServerRequest* request) {
+    request->send(200, "text/plain", __COMPILED_APP_VERSION__);
   });
 
-  webServer.onNotFound([]() {
-    webServer.sendHeader("Location", "/");
-    webServer.send(302, "text/plain", "");
+  webServer.onNotFound([](AsyncWebServerRequest* request) {
+    request->redirect("/");
   });
 
   webServer.begin();
@@ -204,6 +196,5 @@ void setup() {
 }
 
 void loop() {
-  webServer.handleClient();
   ArduinoOTA.handle();
 }
