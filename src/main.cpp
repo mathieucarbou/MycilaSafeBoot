@@ -16,7 +16,7 @@
   #include <ESPmDNS.h>
 #endif
 
-#ifdef SAFEBOOT_LOGGING
+#ifdef MYCILA_SAFEBOOT_LOGGING
   #define LOG(format, ...) Serial.printf(format, ##__VA_ARGS__)
 #else
   #define LOG(format, ...)
@@ -191,7 +191,7 @@ static void start_arduino_ota() {
 }
 
 void setup() {
-#ifdef SAFEBOOT_LOGGING
+#ifdef MYCILA_SAFEBOOT_LOGGING
   Serial.begin(115200);
   #if ARDUINO_USB_CDC_ON_BOOT
   Serial.setTxTimeoutMs(0);
