@@ -202,6 +202,8 @@ Factory image generated: /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/Ap
 
 the `factory.py` script generates a complete factory image named `firmware.factory.bin` with all this content.
 
+It can be downloaded from [https://github.com/mathieucarbou/MycilaSafeBoot/releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases).
+
 Flash this factory image on an ESP32:
 
 ```bash
@@ -301,3 +303,26 @@ Disabling mDNS saves about 24 kbytes. Enable both [...]\_NO_DNS options in `plat
 | wemos_d1_uno32       |  ✅  |   ✅    |    ❌    |
 | wipy3                |  ✅  |   ❌    |    ❌    |
 | wt32-eth01           |  ❌  |   ❌    |    ✅    |
+
+## How to automatically update a firmware from PlatformIO
+
+First make sure you created an HTTP endpoint that can be called to restart the app in SafeBoot mode.
+See [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app).
+
+Then add to your PlatformIO `platformio.ini` file:
+
+```ini
+upload_protocol = espota
+upload_port = 192.168.125.99
+custom_safeboot_restart_path = /api/system/safeboot
+extra_scripts =
+  tools/safeboot.py
+```
+
+The `safeboot.py` script can be downloaded from teh release page: [https://github.com/mathieucarbou/MycilaSafeBoot/releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases).
+
+- `upload_protocol = espota` tells PlatformIO to use Arduono OTA to upload the firmware
+- `upload_port` is the IP address of the ESP32
+- `custom_safeboot_restart_path` is the path to call to restart the app in SafeBoot mode
+
+Once done, just run a `pio run -t upload` or `pio run -t uploadfs` for example and you will see the app automatically restarting in SafeBoot mode, then upload will be achieved, then the ESP will be restarted with your new app.
