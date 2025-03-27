@@ -1,10 +1,6 @@
-# SPDX-License-Identifier: MIT
-#
-# Copyright (C) 2023-2025 Mathieu Carbou
-#
 Import("env")
-import os
 import sys
+import urllib.request
 
 quiet = False
 
@@ -22,18 +18,27 @@ def critical(msg):
     sys.stderr.write("\n")
 
 
+# open "/safeboot" on target to restart in SafeBoot-mode
 def safeboot(source, target, env):
-    # platformio estimates the amount of flash used to store the firmware. this
-    # estimate is not accurate. we perform a final check on the firmware bin
-    # size by comparing it against the respective partition size.
-    max_size = env.BoardConfig().get("upload.maximum_size", 1)
-    fw_size = os.path.getsize(env.subst("$BUILD_DIR/${PROGNAME}.bin"))
-    if fw_size > max_size:
-        raise Exception("firmware binary too large: %d > %d" % (fw_size, max_size))
+    upload_protocol = env.GetProjectOption("upload_protocol")
+    upload_port = env.GetProjectOption("upload_port")
+    if upload_protocol != "espota":
+        critical("Wrong upload protocol (%s)" % upload_protocol)
+        raise Exception("Wrong upload protocol!")
+    else:
+        status("Trying to activate SafeBoot on: %s" % upload_port)
+        safeboot_path = env.GetProjectOption("custom_safeboot_restart_path", "/safeboot")
+        req = urllib.request.Request("http://" + upload_port + safeboot_path, method="POST")
+        try:
+            urllib.request.urlopen(req)
+        except urllib.error.URLError as e:
+            critical(e)
+            # Raise exception when SafeBoot cannot be activated
+            pass
 
-    status("Firmware size valid: %d <= %d" % (fw_size, max_size))
-
-    status("SafeBoot firmware created: %s" % env.subst("$BUILD_DIR/${PROGNAME}.bin"))
+        status("Activated SafeBoot on: %s" % upload_port)
 
 
-env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", safeboot)
+env.AddPreAction("upload", safeboot)
+env.AddPreAction("uploadfs", safeboot)
+env.AddPreAction("uploadfsota", safeboot)

@@ -174,6 +174,7 @@ jobs:
           files: |
             artifacts/*.bin
             tools/factory.py
+            tools/safeboot.py
 
       - name: Release
         if: ${{ startsWith(github.ref, 'refs/tags/v') }}
@@ -182,3 +183,4 @@ jobs:
           files: |
             artifacts/*.bin
             tools/factory.py
+            tools/safeboot.py
