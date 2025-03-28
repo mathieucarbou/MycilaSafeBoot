@@ -8,6 +8,13 @@
 AsyncWebServer webServer(80);
 Mycila::ESPConnect espConnect(webServer);
 
+static String webpage =
+  R"(<h1>MyAwsomeApp</h1>
+     <p>Built on ${D} at ${T}</p><br>
+     <form method='POST' action='/safeboot' enctype='multipart/form-data'>
+        <input type='submit' value='Restart in SafeBoot mode'>
+     </form>)";
+
 void setup() {
   Serial.begin(115200);
 #if ARDUINO_USB_CDC_ON_BOOT
@@ -17,6 +24,10 @@ void setup() {
   while (!Serial)
     yield();
 #endif
+
+  // update the webpage with the compile date and time
+  webpage.replace("${D}", __DATE__);
+  webpage.replace("${T}", __TIME__);
 
   // reboot esp into SafeBoot
   webServer.on("/safeboot", HTTP_POST, [](AsyncWebServerRequest* request) {
@@ -32,7 +43,7 @@ void setup() {
       case Mycila::ESPConnect::State::AP_STARTED:
         // serve your home page here
         webServer.on("/", HTTP_GET, [&](AsyncWebServerRequest* request) {
-                   request->send(200, "text/html", "<h1>MyAwsomeApp</h1><br><form method='POST' action='/safeboot' enctype='multipart/form-data'><input type='submit' value='Restart in SafeBoot mode'></form>");
+                   request->send(200, "text/html", webpage.c_str());
                  })
           .setFilter([](__unused AsyncWebServerRequest* request) { return espConnect.getState() != Mycila::ESPConnect::State::PORTAL_STARTED; });
         webServer.begin();
