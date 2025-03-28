@@ -23,9 +23,9 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [SafeBoot Example](#safeboot-example)
 - [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app)
 - [Configuration options to manage build size](#configuration-options-to-manage-build-size)
-  - [Options matrix](#options-matrix)
+- [Options matrix](#options-matrix)
 - [Default board options](#default-board-options)
-- [How to automatically update a firmware from PlatformIO](#how-to-automatically-update-a-firmware-from-platformio)
+- [How to OTA update firmware from PlatformIO](#how-to-ota-update-firmware-from-platformio)
 
 ![](https://private-user-images.githubusercontent.com/61346/426535795-7eda5f6e-7900-4380-921f-8e54fb2b2e2c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI5MDgwOTEsIm5iZiI6MTc0MjkwNzc5MSwicGF0aCI6Ii82MTM0Ni80MjY1MzU3OTUtN2VkYTVmNmUtNzkwMC00MzgwLTkyMWYtOGU1NGZiMmIyZTJjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAzMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMzI1VDEzMDMxMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThkNTVjMTJjNzZmNzdiYWZkZjkxZWE4ZTkxOWM4MTQ1MzliZTFhNzRkZmU5NzY5MTk2MWJmMjQyYzJiN2Y1OTAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.7vsJcZDQrAa4Z_G4R663ENGhQDNTleVThGd6x8GAnGo)
 
@@ -305,7 +305,7 @@ Disabling mDNS saves about 24 kbytes. Enable both [...]\_NO_DNS options in `plat
 | wipy3                |  ✅  |   ❌    |    ❌    |
 | wt32-eth01           |  ❌  |   ❌    |    ✅    |
 
-## How to automatically update a firmware from PlatformIO
+## How to OTA update firmware from PlatformIO
 
 First make sure you created an HTTP endpoint that can be called to restart the app in SafeBoot mode.
 See [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mode-from-the-app).
@@ -313,17 +313,23 @@ See [How to reboot in SafeBoot mode from the app](#how-to-reboot-in-safeboot-mod
 Then add to your PlatformIO `platformio.ini` file:
 
 ```ini
+board_build.partitions = partitions-4MB-safeboot.csv
 upload_protocol = espota
+; set OTA upload port to the ip-address when not using mDNS
 upload_port = 192.168.125.99
+; when mDNS is enabled, just point the upload to the hostname
+; upload_port = MyAwesomeApp.local
 custom_safeboot_restart_path = /api/system/safeboot
 extra_scripts =
   tools/safeboot.py
 ```
 
-The `safeboot.py` script can be downloaded from teh release page: [https://github.com/mathieucarbou/MycilaSafeBoot/releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases).
+The `safeboot.py` script can be downloaded from the release page: [https://github.com/mathieucarbou/MycilaSafeBoot/releases](https://github.com/mathieucarbou/MycilaSafeBoot/releases). The partition table `partitions-4MB-safeboot.csv` is found in the [example folder](https://github.com/mathieucarbou/MycilaSafeBoot/tree/main/examples/App_ESPConnect_OTA).
 
-- `upload_protocol = espota` tells PlatformIO to use Arduono OTA to upload the firmware
-- `upload_port` is the IP address of the ESP32
+- `upload_protocol = espota` tells PlatformIO to use Arduino OTA to upload the firmware
+- `upload_port` is the IP address or mDNS name of the ESP32
 - `custom_safeboot_restart_path` is the path to call to restart the app in SafeBoot mode
 
 Once done, just run a `pio run -t upload` or `pio run -t uploadfs` for example and you will see the app automatically restarting in SafeBoot mode, then upload will be achieved, then the ESP will be restarted with your new app.
+
+See `examples/App_ESPConnect_OTA` for an example.
