@@ -16,6 +16,8 @@ It allows to have only one application partition to use the maximum available fl
 
 The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.github.io/docs/Safeboot/).
 
+
+
 - [Overview](#overview)
 - [How it works](#how-it-works)
 - [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
@@ -27,7 +29,7 @@ The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.gi
 - [Default board options](#default-board-options)
 - [How to OTA update firmware from PlatformIO](#how-to-ota-update-firmware-from-platformio)
 
-![](https://private-user-images.githubusercontent.com/61346/426535795-7eda5f6e-7900-4380-921f-8e54fb2b2e2c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDI5MDgwOTEsIm5iZiI6MTc0MjkwNzc5MSwicGF0aCI6Ii82MTM0Ni80MjY1MzU3OTUtN2VkYTVmNmUtNzkwMC00MzgwLTkyMWYtOGU1NGZiMmIyZTJjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTAzMjUlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwMzI1VDEzMDMxMVomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPThkNTVjMTJjNzZmNzdiYWZkZjkxZWE4ZTkxOWM4MTQ1MzliZTFhNzRkZmU5NzY5MTk2MWJmMjQyYzJiN2Y1OTAmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.7vsJcZDQrAa4Z_G4R663ENGhQDNTleVThGd6x8GAnGo)
+![](https://private-user-images.githubusercontent.com/61346/426535795-7eda5f6e-7900-4380-921f-8e54fb2b2e2c.png?jwt=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tIiwiYXVkIjoicmF3LmdpdGh1YnVzZXJjb250ZW50LmNvbSIsImtleSI6ImtleTUiLCJleHAiOjE3NDM5NjQ4MjIsIm5iZiI6MTc0Mzk2NDUyMiwicGF0aCI6Ii82MTM0Ni80MjY1MzU3OTUtN2VkYTVmNmUtNzkwMC00MzgwLTkyMWYtOGU1NGZiMmIyZTJjLnBuZz9YLUFtei1BbGdvcml0aG09QVdTNC1ITUFDLVNIQTI1NiZYLUFtei1DcmVkZW50aWFsPUFLSUFWQ09EWUxTQTUzUFFLNFpBJTJGMjAyNTA0MDYlMkZ1cy1lYXN0LTElMkZzMyUyRmF3czRfcmVxdWVzdCZYLUFtei1EYXRlPTIwMjUwNDA2VDE4MzUyMlomWC1BbXotRXhwaXJlcz0zMDAmWC1BbXotU2lnbmF0dXJlPTdjN2Y5YmQ2YmU0YjAyOTEzNzdiMzc4YTExNzM4NjgwNWI5MzRkMjc4MWJjZDZlNWMwNTExYmIxMDMyYTVjM2MmWC1BbXotU2lnbmVkSGVhZGVycz1ob3N0In0.uJq7XczPOdOlZTsLLgYw6IeRHdbwrk1n8y7YOnuMVGY)
 
 ## Overview
 
