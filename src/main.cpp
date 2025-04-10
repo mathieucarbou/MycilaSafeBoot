@@ -167,7 +167,7 @@ static void start_network_manager() {
   LOG("Hostname: %s\n", espConnectConfig.hostname.c_str());
   if (espConnectConfig.apMode) {
     LOG("AP: %s\n", espConnectConfig.hostname.c_str());
-  } else if (espConnectConfig.wifiBSSID.length()) {
+  } else if (espConnectConfig.wifiSSID.length()) {
     LOG("SSID: %s\n", espConnectConfig.wifiSSID.c_str());
     LOG("BSSID: %s\n", espConnectConfig.wifiBSSID.c_str());
   }
