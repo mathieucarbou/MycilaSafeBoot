@@ -4,4 +4,7 @@
 /.vscode
 /logs
 
-/sdkconfig.defaults
+/sdkconfig.*
+/dependencies.lock
+/managed_components
+/.dummy
