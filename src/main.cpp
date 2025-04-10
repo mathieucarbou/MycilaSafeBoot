@@ -163,16 +163,18 @@ static void start_network_manager() {
     }
   });
 
+  // show config
+  LOG("Hostname: %s\n", espConnectConfig.hostname.c_str());
+  if (espConnectConfig.apMode) {
+    LOG("AP: %s\n", espConnectConfig.hostname.c_str());
+  } else if (espConnect.getWiFiSSID().length()) {
+    LOG("SSID: %s\n", espConnectConfig.wifiSSID.c_str());
+    LOG("BSSID: %s\n", espConnectConfig.wifiBSSID.c_str());
+  }
+
   // connect...
   espConnect.begin(espConnectConfig.hostname.c_str(), "", espConnectConfig);
-
-  if (espConnectConfig.apMode) {
-    LOG("AP: %s\n", espConnect.getAccessPointSSID().c_str());
-  } else if (espConnect.getWiFiSSID().length()) {
-    LOG("SSID: %s\n", espConnect.getWiFiSSID().c_str());
-  }
   LOG("IP: %s\n", espConnect.getIPAddress().toString().c_str());
-  LOG("Hostname: %s\n", espConnect.getHostname().c_str());
 }
 
 static void start_mdns() {
@@ -184,8 +186,6 @@ static void start_mdns() {
 
 static void start_arduino_ota() {
   ArduinoOTA.setHostname(espConnectConfig.hostname.c_str());
-  ArduinoOTA.setRebootOnSuccess(true);
-  ArduinoOTA.setMdnsEnabled(true);
   ArduinoOTA.begin();
   LOG("OTA Server started on port 3232\n");
 }
