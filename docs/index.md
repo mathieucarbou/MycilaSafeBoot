@@ -250,7 +250,7 @@ if (partition) {
 
 Squezing everything into the SafeBoot partition (655360 bytes only) is a tight fit especially on ethernet enabled boards.
 
-Disabling the logging capabilites saves about 12 kbytes in the final build. Just comment out `MYCILA_SAFEBOOT_LOGGING` in `platformio.ini`.
+Disabling the logging capabilities saves about 12 kbytes in the final build. Just comment out `MYCILA_SAFEBOOT_LOGGING` in `platformio.ini`.
 
 ```ini
 ; -D MYCILA_SAFEBOOT_LOGGING
