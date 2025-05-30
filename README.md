@@ -137,7 +137,7 @@ In the PIO file, some settings are added to specify the partition table and the 
 extra_scripts = post:factory.py
 board_build.partitions = partitions-4MB-safeboot.csv
 board_build.app_partition_name = app
-custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/v3.2.5/safeboot-esp32dev.bin
+custom_safeboot_url = https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/v3.2.6/safeboot-esp32dev.bin
 ```
 
 It is also possible to point to a folder if you download the SafeBoot project locally:
@@ -189,7 +189,7 @@ You should see at the end of the build something like:
 
 ```
 Generating factory image for serial flashing
-Downloading SafeBoot image from https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/v3.2.5/safeboot-esp32dev.bin
+Downloading SafeBoot image from https://github.com/mathieucarbou/MycilaSafeBoot/releases/download/v3.2.6/safeboot-esp32dev.bin
     Offset | File
  -   0x1000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/bootloader.bin
  -   0x8000 | /Users/mat/Data/Workspace/me/MycilaSafeBoot/examples/App/.pio/build/esp32dev/partitions.bin
