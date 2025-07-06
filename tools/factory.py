@@ -25,12 +25,23 @@ def status(msg):
 
 def critical(msg):
     """Print critical message to stderr"""
-    sys.stderr.write("factory.py: ")
-    sys.stderr.write(msg)
-    sys.stderr.write("\n")
+    sys.stdout.write("factory.py: ")
+    sys.stdout.write(msg)
+    sys.stdout.write("\n")
 
 
-def generateFactooryImage(source, target, env):
+def esptool_call(cmd):
+    try:
+        esptool.main(cmd)
+    except SystemExit as e:
+        # Fetch sys.exit() without leaving the script
+        if e.code == 0:
+            return True
+        else:
+            print(f"❌ esptool failed with exit code: {e.code}")
+            return False
+
+def generateFactoryImage(source, target, env):
     status("Generating factory image for serial flashing")
 
     app_offset = 0x10000
@@ -38,7 +49,8 @@ def generateFactooryImage(source, target, env):
 
     # Set fs_offset = 0 to disable LittleFS image generation
     # Set fs_offset to the correct offset from the partition to generate a LittleFS image
-    fs_offset = 0
+    fs_offset = 0x0
+    # fs_offset = 0x3E0000
     fs_image = env.subst("$BUILD_DIR/littlefs.bin")
 
     safeboot_offset = 0x10000
@@ -47,15 +59,10 @@ def generateFactooryImage(source, target, env):
     if safeboot_image == "":
         safeboot_project = env.GetProjectOption("custom_safeboot_dir", "")
         if safeboot_project != "":
-            status(
-                "Building SafeBoot image for board %s from %s"
-                % (env.get("BOARD"), safeboot_project)
-            )
+            status("Building SafeBoot image for board %s from %s" % (env.get("BOARD"), safeboot_project))
             if not os.path.isdir(safeboot_project):
                 raise Exception("SafeBoot project not found: %s" % safeboot_project)
-            env.Execute(
-                "SAFEBOOT_BOARD=%s pio run -e safeboot -d %s" % (env.get("BOARD"), safeboot_project)
-            )
+            env.Execute("SAFEBOOT_BOARD=%s pio run -e safeboot -d %s" % (env.get("BOARD"), safeboot_project))
             safeboot_image = join(safeboot_project, ".pio/build/safeboot/firmware.bin")
             if not os.path.isfile(safeboot_image):
                 raise Exception("SafeBoot image not found: %s" % safeboot_image)
@@ -65,10 +72,7 @@ def generateFactooryImage(source, target, env):
         if safeboot_url != "":
             safeboot_image = env.subst("$BUILD_DIR/safeboot.bin")
             if not os.path.isfile(safeboot_image):
-                status(
-                    "Downloading SafeBoot image from %s to %s"
-                    % (safeboot_url, safeboot_image)
-                )
+                status("Downloading SafeBoot image from %s to %s" % (safeboot_url, safeboot_image))
                 response = requests.get(safeboot_url)
                 if response.status_code != 200:
                     raise Exception("Download error: %d" % response.status_code)
@@ -98,14 +102,14 @@ def generateFactooryImage(source, target, env):
     cmd = [
         "--chip",
         chip,
-        "merge_bin",
+        "merge-bin",
         "-o",
         factory_image,
-        "--flash_mode",
+        "--flash-mode",
         flash_mode,
-        "--flash_freq",
+        "--flash-freq",
         flash_freq,
-        "--flash_size",
+        "--flash-size",
         flash_size,
     ]
 
@@ -116,6 +120,9 @@ def generateFactooryImage(source, target, env):
     fw_size = getsize(env.subst("$BUILD_DIR/${PROGNAME}.bin"))
     if fw_size > max_size:
         raise Exception("Firmware binary too large: %d > %d" % (fw_size, max_size))
+
+    status("Generating factory image at: %s" % factory_image)
+    status("You can flash it with:\n> esptool.py write_flash 0x0 %s" % factory_image)
 
     status("     Offset | File")
     for section in sections:
@@ -138,11 +145,10 @@ def generateFactooryImage(source, target, env):
         status(f" - {hex(fs_offset)} | {fs_image}")
         cmd += [hex(fs_offset), fs_image]
 
-    status("Using esptool.py arguments: %s" % " ".join(cmd))
+    # status("Using esptool.py arguments: %s" % " ".join(cmd))
 
-    esptool.main(cmd)
+    esptool_call(["version"])
+    esptool_call(cmd)
 
-    status("Factory image generated! You can flash it with:\n> esptool.py write_flash 0x0 %s" % factory_image)
 
-
-env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", generateFactooryImage)
+env.AddPostAction("$BUILD_DIR/${PROGNAME}.bin", generateFactoryImage)
