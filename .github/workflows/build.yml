@@ -75,6 +75,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
           pip install --upgrade intelhex
+          pip install --upgrade rich_click
           REF_NAME="${{ github.ref_name }}" pio run -e ${{ matrix.board }}
           cp .pio/build/${{ matrix.board }}/firmware.bin ./safeboot-${{ matrix.board }}.bin
 
@@ -142,6 +143,7 @@ jobs:
           python -m pip install --upgrade pip
           pip install --upgrade platformio
           pip install --upgrade intelhex
+          pip install --upgrade rich_click
           SAFEBOOT_IMAGE=../artifacts/${{ matrix.board }}/safeboot-${{ matrix.board }}.bin BOARD=${{ matrix.board }} pio run -d test -e ci
 
   release:
