@@ -74,6 +74,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
+          pip install --upgrade intelhex
           REF_NAME="${{ github.ref_name }}" pio run -e ${{ matrix.board }}
           cp .pio/build/${{ matrix.board }}/firmware.bin ./safeboot-${{ matrix.board }}.bin
 
@@ -140,6 +141,7 @@ jobs:
         run: |
           python -m pip install --upgrade pip
           pip install --upgrade platformio
+          pip install --upgrade intelhex
           SAFEBOOT_IMAGE=../artifacts/${{ matrix.board }}/safeboot-${{ matrix.board }}.bin BOARD=${{ matrix.board }} pio run -d test -e ci
 
   release:
