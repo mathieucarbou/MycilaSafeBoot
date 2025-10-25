@@ -38,6 +38,7 @@ jobs:
             "lilygo-t-eth-lite-s3",
             "lolin_s2_mini",
             "tinypico",
+            "waveshare_esp32s3_eth",
             "wemos_d1_uno32",
             "wipy3",
             "wt32-eth01",

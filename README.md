@@ -16,8 +16,6 @@ It allows to have only one application partition to use the maximum available fl
 
 The idea is not new: [Tasmota also uses a SafeBoot partition](https://tasmota.github.io/docs/Safeboot/).
 
-
-
 - [Overview](#overview)
 - [How it works](#how-it-works)
 - [How to integrate the SafeBoot in your project](#how-to-integrate-the-safeboot-in-your-project)
@@ -265,47 +263,49 @@ Disabling mDNS saves about 24 kbytes. Enable both [...]\_NO_DNS options in `plat
 
 ### Options matrix
 
-| Board                | mDNS: on, logger: on | mDNS: on, logger: off | mDNS: off, logger: off |
-| -------------------- | -------------------- | --------------------- | ---------------------- |
-| denky_d4             | NOT SUPPORTED        | OK                    | OK                     |
-| esp32-c3-devkitc-02  | OK                   | OK                    | OK                     |
-| esp32-c6-devkitc-1   | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
-| esp32-gateway        | NOT SUPPORTED        | OK                    | OK                     |
-| esp32-poe            | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
-| esp32-poe-iso        | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
-| esp32-s2-saola-1     | OK                   | OK                    | OK                     |
-| esp32-s3-devkitc-1   | OK                   | OK                    | OK                     |
-| esp32-solo1          | OK                   | OK                    | OK                     |
-| esp32dev             | OK                   | OK                    | OK                     |
-| esp32s3box           | OK                   | OK                    | OK                     |
-| lilygo-t-eth-lite-s3 | OK                   | OK                    | OK                     |
-| lolin_s2_mini        | OK                   | OK                    | OK                     |
-| tinypico             | NOT SUPPORTED        | OK                    | OK                     |
-| wemos_d1_uno32       | OK                   | OK                    | OK                     |
-| wipy3                | NOT SUPPORTED        | OK                    | OK                     |
-| wt32-eth01           | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
+| Board                 | mDNS: on, logger: on | mDNS: on, logger: off | mDNS: off, logger: off |
+| --------------------- | -------------------- | --------------------- | ---------------------- |
+| denky_d4              | NOT SUPPORTED        | OK                    | OK                     |
+| esp32-c3-devkitc-02   | OK                   | OK                    | OK                     |
+| esp32-c6-devkitc-1    | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
+| esp32-gateway         | NOT SUPPORTED        | OK                    | OK                     |
+| esp32-poe             | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
+| esp32-poe-iso         | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
+| esp32-s2-saola-1      | OK                   | OK                    | OK                     |
+| esp32-s3-devkitc-1    | OK                   | OK                    | OK                     |
+| esp32-solo1           | OK                   | OK                    | OK                     |
+| esp32dev              | OK                   | OK                    | OK                     |
+| esp32s3box            | OK                   | OK                    | OK                     |
+| lilygo-t-eth-lite-s3  | OK                   | OK                    | OK                     |
+| lolin_s2_mini         | OK                   | OK                    | OK                     |
+| tinypico              | NOT SUPPORTED        | OK                    | OK                     |
+| waveshare_esp32s3_eth | OK                   | OK                    | OK                     |
+| wemos_d1_uno32        | OK                   | OK                    | OK                     |
+| wipy3                 | NOT SUPPORTED        | OK                    | OK                     |
+| wt32-eth01            | NOT SUPPORTED        | NOT SUPPORTED         | OK                     |
 
 ## Default board options
 
-| Board                | mDNS | Logging | Ethernet |
-| :------------------- | :--: | :-----: | :------: |
-| denky_d4             |  ✅  |   ❌    |    ❌    |
-| esp32-c3-devkitc-02  |  ✅  |   ✅    |    ❌    |
-| esp32-c6-devkitc-1   |  ❌  |   ❌    |    ❌    |
-| esp32-gateway        |  ✅  |   ❌    |    ✅    |
-| esp32-poe            |  ❌  |   ❌    |    ✅    |
-| esp32-poe-iso        |  ❌  |   ❌    |    ✅    |
-| esp32-s2-saola-1     |  ✅  |   ✅    |    ❌    |
-| esp32-s3-devkitc-1   |  ✅  |   ✅    |    ❌    |
-| esp32-solo1          |  ✅  |   ✅    |    ❌    |
-| esp32dev             |  ✅  |   ✅    |    ❌    |
-| esp32s3box           |  ✅  |   ✅    |    ❌    |
-| lilygo-t-eth-lite-s3 |  ✅  |   ✅    |    ✅    |
-| lolin_s2_mini        |  ✅  |   ✅    |    ❌    |
-| tinypico             |  ✅  |   ❌    |    ❌    |
-| wemos_d1_uno32       |  ✅  |   ✅    |    ❌    |
-| wipy3                |  ✅  |   ❌    |    ❌    |
-| wt32-eth01           |  ❌  |   ❌    |    ✅    |
+| Board                 | mDNS | Logging | Ethernet |
+| :-------------------- | :--: | :-----: | :------: |
+| denky_d4              |  ✅  |   ❌    |    ❌    |
+| esp32-c3-devkitc-02   |  ✅  |   ✅    |    ❌    |
+| esp32-c6-devkitc-1    |  ❌  |   ❌    |    ❌    |
+| esp32-gateway         |  ✅  |   ❌    |    ✅    |
+| esp32-poe             |  ❌  |   ❌    |    ✅    |
+| esp32-poe-iso         |  ❌  |   ❌    |    ✅    |
+| esp32-s2-saola-1      |  ✅  |   ✅    |    ❌    |
+| esp32-s3-devkitc-1    |  ✅  |   ✅    |    ❌    |
+| esp32-solo1           |  ✅  |   ✅    |    ❌    |
+| esp32dev              |  ✅  |   ✅    |    ❌    |
+| esp32s3box            |  ✅  |   ✅    |    ❌    |
+| lilygo-t-eth-lite-s3  |  ✅  |   ✅    |    ✅    |
+| lolin_s2_mini         |  ✅  |   ✅    |    ❌    |
+| tinypico              |  ✅  |   ❌    |    ❌    |
+| waveshare_esp32s3_eth |  ✅  |   ✅    |    ✅    |
+| wemos_d1_uno32        |  ✅  |   ✅    |    ❌    |
+| wipy3                 |  ✅  |   ❌    |    ❌    |
+| wt32-eth01            |  ❌  |   ❌    |    ✅    |
 
 ## How to OTA update firmware from PlatformIO
 
