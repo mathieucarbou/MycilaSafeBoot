@@ -175,3 +175,70 @@ jobs:
             artifacts/*.bin
             tools/factory.py
             tools/safeboot.py
+
+  latest-MycilaESPConnect:
+    name: safeboot-${{ matrix.board }}.bin (with latest MycilaESPConnect)
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        board:
+          [
+            "denky_d4",
+            "esp32-c3-devkitc-02",
+            "esp32-c6-devkitc-1",
+            "esp32-gateway",
+            "esp32-poe-iso",
+            "esp32-poe",
+            "esp32-s2-saola-1",
+            "esp32-s3-devkitc-1",
+            # "esp32-solo1",
+            "esp32dev",
+            "esp32s3box",
+            "lilygo-t-eth-lite-s3",
+            "lolin_s2_mini",
+            "tinypico",
+            "waveshare_esp32s3_eth",
+            "wemos_d1_uno32",
+            "wipy3",
+            "wt32-eth01",
+          ]
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v5
+
+      - name: Get Tags
+        run: git fetch --force --tags origin
+
+      - name: Cache PlatformIO
+        uses: actions/cache@v4
+        with:
+          key: ${{ runner.os }}-pio
+          path: |
+            ~/.cache/pip
+            ~/.platformio
+
+      - name: Python
+        uses: actions/setup-python@v6
+        with:
+          python-version: "3.x"
+
+      - name: Install npm
+        uses: actions/setup-node@v5
+        with:
+          node-version: '20.x'
+
+      - name: Install html-minifier-terser
+        run: npm install -g html-minifier-terser
+
+      - name: Switch MycilaESPConnect to main branch at https://github.com/mathieucarbou/MycilaESPConnect
+        run: |
+          sed -i 's|mathieucarbou/MycilaESPConnect @ .*|https://github.com/mathieucarbou/MycilaESPConnect|' platformio.ini
+
+      - name: Build
+        run: |
+          python -m pip install --upgrade pip
+          pip install --upgrade platformio
+          pip install --upgrade intelhex
+          pip install --upgrade rich_click
+          REF_NAME="${{ github.ref_name }}" pio run -e ${{ matrix.board }}
