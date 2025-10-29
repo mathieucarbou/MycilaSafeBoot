@@ -81,7 +81,7 @@ jobs:
           cp .pio/build/${{ matrix.board }}/firmware.bin ./safeboot-${{ matrix.board }}.bin
 
       - name: Upload
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: ${{ matrix.board }}
           if-no-files-found: error
