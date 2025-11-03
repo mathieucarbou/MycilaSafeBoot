@@ -301,7 +301,7 @@
     <div class="shadow_container">
 
       <div class="mode_switch_container" id="mode_switch_container">
-        <h4 id="label_firmware">Firmware</h4>
+        <h4 id="label_firmware">Firmware (<a id="label_firmware_backup" href="/backup/fw">backup</a>)</h4>
         <div class="toggle_switch_container">
           <input
             type="checkbox"
@@ -312,7 +312,7 @@
             <span class="toggle_switch_slider"></span>
           </label>
         </div>
-        <h4 id="label_filesystem">File System</h4>
+        <h4 id="label_filesystem">File System (<a id="label_filesystem_backup" href="/backup/fs">backup</a>)</h4>
       </div>
 
       <div class="drop_zone" id="drop_zone">
@@ -426,7 +426,9 @@
         "clickable_file_input"
       );
       const label_firmware = document.getElementById("label_firmware");
+      const label_firmware_backup = document.getElementById("label_firmware_backup");
       const label_filesystem = document.getElementById("label_filesystem");
+      const label_filesystem_backup = document.getElementById("label_filesystem_backup");
       const mode_container = document.getElementById("mode_switch_container");
       const mode_checkbox = document.getElementById("toggle_switch_checkbox");
       const info_text_chipspecs = document.getElementById(
@@ -482,14 +484,19 @@
       getInfos();
 
       label_firmware.style.color = "black";
+      label_firmware_backup.style.color = "black";
 
       mode_checkbox.addEventListener("change", function () {
         if (mode_checkbox.checked) {
           label_firmware.style.color = "gray";
+          label_firmware_backup.style.color = "gray";
           label_filesystem.style.color = "black";
+          label_filesystem_backup.style.color = "black";
         } else {
           label_firmware.style.color = "black";
+          label_firmware_backup.style.color = "black";
           label_filesystem.style.color = "gray";
+          label_filesystem_backup.style.color = "gray";
         }
       });
 

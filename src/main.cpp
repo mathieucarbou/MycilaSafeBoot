@@ -43,6 +43,31 @@ static String getChipIDStr() {
   return espId;
 }
 
+static void sendPartition(const esp_partition_t* partition) {
+  webServer.setContentLength(partition->size);
+  webServer.sendHeader("Content-Disposition", "attachment; filename=" + String(partition->label) + ".bin");
+  webServer.send(200, "application/octet-stream", "");
+
+  uint8_t* buffer = new uint8_t[4094];
+  uint32_t index = 0;
+
+  while (index < partition->size) {
+    size_t len = partition->size - index;
+    if (len > 4094)
+      len = 4094;
+    if (esp_partition_read(partition, index, buffer, len) == ESP_OK) {
+      webServer.client().write(buffer, len);
+      index += len;
+    } else {
+      webServer.send(500, "text/plain", "Cannot read partition");
+      delete[] buffer;
+      return;
+    }
+  }
+
+  delete[] buffer;
+}
+
 static void start_web_server() {
   webServer.onNotFound([]() {
     webServer.sendHeader("Location", "/");
@@ -74,6 +99,24 @@ static void start_web_server() {
   webServer.on("/", HTTP_GET, [&]() {
     webServer.sendHeader("Content-Encoding", "gzip");
     webServer.send_P(200, "text/html", reinterpret_cast<const char*>(update_html_start), update_html_end - update_html_start);
+  });
+
+  webServer.on("/backup/fw", HTTP_GET, [&]() {
+    const esp_partition_t* partition = esp_ota_get_running_partition();
+    if (!partition) {
+      webServer.send(500, "text/plain", "Cannot find running partition");
+      return;
+    }
+    sendPartition(partition);
+  });
+
+  webServer.on("/backup/fs", HTTP_GET, [&]() {
+    const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_DATA, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_DATA_SPIFFS, nullptr);
+    if (!partition) {
+      webServer.send(500, "text/plain", "Cannot find SPIFFS partition");
+      return;
+    }
+    sendPartition(partition);
   });
 
   webServer.on(
