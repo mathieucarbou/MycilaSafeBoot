@@ -45,7 +45,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get Tags
         run: git fetch --force --tags origin
@@ -116,7 +116,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get Tags
         run: git fetch --force --tags origin
@@ -156,7 +156,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Download
         uses: actions/download-artifact@v6
@@ -205,7 +205,7 @@ jobs:
           ]
     steps:
       - name: Checkout
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
 
       - name: Get Tags
         run: git fetch --force --tags origin
