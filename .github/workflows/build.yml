@@ -51,7 +51,7 @@ jobs:
         run: git fetch --force --tags origin
 
       - name: Cache PlatformIO
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-pio
           path: |
@@ -122,7 +122,7 @@ jobs:
         run: git fetch --force --tags origin
 
       - name: Cache PlatformIO
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-pio
           path: |
@@ -211,7 +211,7 @@ jobs:
         run: git fetch --force --tags origin
 
       - name: Cache PlatformIO
-        uses: actions/cache@v4
+        uses: actions/cache@v5
         with:
           key: ${{ runner.os }}-pio
           path: |
