@@ -8,9 +8,12 @@ Import("env")
 
 
 def do_main():
+    # install dependencies
+    env.Execute("$PYTHONEXE -m pip install littlefs-python")
+
     # hash
     ret = subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, text=True, check=False)  # Uses any tags
-    full_hash = ret.stdout.strip()
+    full_hash = ret.stdout.strip() if ret.returncode == 0 else "unknown"
     short_hash = full_hash[:7]
 
     # branch
@@ -30,7 +33,7 @@ def do_main():
         branch = branch.replace("_", "")
 
     if branch == "":
-        raise Exception("No branch name found")
+        branch = "local"
 
     # is_tag ?
     tagPattern = re.compile("^v[0-9]+.[0-9]+.[0-9]+([_-][a-zA-Z0-9]+)?$")
@@ -62,7 +65,7 @@ def do_main():
             f'const char* __COMPILED_APP_VERSION__ = "{version[1:] if tagPattern.match(version)  else version}";\n'
             f'const char* __COMPILED_BUILD_BRANCH__ = "{branch}";\n'
             f'const char* __COMPILED_BUILD_HASH__ = "{short_hash}";\n'
-            f'const char* __COMPILED_BUILD_NAME__ = "{env["PIOENV"]}";\n'
+            f'const char* __COMPILED_BUILD_ENV__ = "{env["PIOENV"]}";\n'
             f'const char* __COMPILED_BUILD_TIMESTAMP__ = "{datetime.now(timezone.utc).isoformat()}";\n'
             f'const char* __COMPILED_BUILD_BOARD__ = "{env.get("BOARD")}";\n'
         )
