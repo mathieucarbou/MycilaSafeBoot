@@ -8,9 +8,6 @@ Import("env")
 
 
 def do_main():
-    # install dependencies
-    env.Execute("$PYTHONEXE -m pip install littlefs-python")
-
     # hash
     ret = subprocess.run(["git", "rev-parse", "HEAD"], stdout=subprocess.PIPE, text=True, check=False)  # Uses any tags
     full_hash = ret.stdout.strip() if ret.returncode == 0 else "unknown"
