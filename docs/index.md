@@ -279,6 +279,7 @@ Disabling mDNS saves about 24 kbytes. Enable both [...]\_NO_DNS options in `plat
 | lolin_s2_mini         |  ✅  |   ✅    |    ❌    |
 | tinypico              |  ✅  |   ❌    |    ❌    |
 | waveshare_esp32s3_eth |  ✅  |   ✅    |    ✅    |
+| wemos_d1_mini32       |  ✅  |   ✅    |    ❌    |
 | wemos_d1_uno32        |  ✅  |   ✅    |    ❌    |
 | wipy3                 |  ✅  |   ❌    |    ❌    |
 | wt32-eth01            |  ❌  |   ❌    |    ✅    |
