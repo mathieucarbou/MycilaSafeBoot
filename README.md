@@ -8,7 +8,6 @@
 
 [![Build](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml/badge.svg)](https://github.com/mathieucarbou/MycilaSafeBoot/actions/workflows/build.yml)
 [![GitHub latest commit](https://badgen.net/github/last-commit/mathieucarbou/MycilaSafeBoot)](https://GitHub.com/mathieucarbou/MycilaSafeBoot/commit/)
-[![Gitpod Ready-to-Code](https://img.shields.io/badge/Gitpod-Ready--to--Code-blue?logo=gitpod)](https://gitpod.io/#https://github.com/mathieucarbou/MycilaSafeBoot)
 
 MycilaSafeBoot is a Web OTA recovery partition for ESP32 / Arduino.
 
