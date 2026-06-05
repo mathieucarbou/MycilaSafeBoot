@@ -158,14 +158,6 @@ Go inside `tools/SafeBoot` and run:
 > pio run -e esp32dev
 ```
 
-If your board does not exist, you can specify it like this:
-
-```bash
-> SAFEBOOT_BOARD=my-board pio run -e safeboot
-```
-
-`SAFEBOOT_BOARD` is the environment variable to specify the board to build the SafeBoot firmware for.
-
 At the end you should see these lines:
 
 ```
