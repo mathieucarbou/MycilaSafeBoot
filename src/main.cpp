@@ -43,6 +43,12 @@ static String getChipIDStr() {
   return espId;
 }
 
+static const esp_partition_t* get_app_partition() {
+  // return the application partition that that is defined as OTA_0, which is the one that the main app should be running from, and that we want to backup, and that we will write OTA updates to.
+  // We do not want to return the currently running partition, which is the safeboot recovery partition.
+  return esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
+}
+
 static void sendPartition(const esp_partition_t* partition) {
   webServer.setContentLength(partition->size);
   webServer.sendHeader("Content-Disposition", "attachment; filename=" + String(partition->label) + ".bin");
@@ -102,7 +108,7 @@ static void start_web_server() {
   });
 
   webServer.on("/backup/fw", HTTP_GET, [&]() {
-    const esp_partition_t* partition = esp_ota_get_running_partition();
+    const esp_partition_t* partition = get_app_partition();
     if (!partition) {
       webServer.send(500, "text/plain", "Cannot find running partition");
       return;
@@ -164,13 +170,6 @@ static void start_web_server() {
 #endif
 
   LOG("Web Server started\n");
-}
-
-static void set_next_partition_to_boot() {
-  const esp_partition_t* partition = esp_partition_find_first(esp_partition_type_t::ESP_PARTITION_TYPE_APP, esp_partition_subtype_t::ESP_PARTITION_SUBTYPE_APP_OTA_0, nullptr);
-  if (partition) {
-    esp_ota_set_boot_partition(partition);
-  }
 }
 
 static void start_network_manager() {
@@ -246,7 +245,12 @@ void setup() {
 #endif
 
   LOG("Version: %s\n", __COMPILED_APP_VERSION__);
-  set_next_partition_to_boot();
+
+  const esp_partition_t* partition = get_app_partition();
+  if (partition) {
+    esp_ota_set_boot_partition(partition);
+  }
+
   start_network_manager();
   start_mdns();
   start_web_server();
