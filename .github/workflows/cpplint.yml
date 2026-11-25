@@ -16,16 +16,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Cache
-        uses: actions/cache@v5
+        uses: actions/cache@v6
         with:
           key: ${{ runner.os }}-cpplint
           path: ~/.cache/pip
 
       - name: Pyhton
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@v7
         with:
           python-version: "3.13"
 
